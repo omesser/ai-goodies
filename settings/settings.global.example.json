@@ -1,0 +1,41 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/path/to/your/hook.mjs\""
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "context-mode@context-mode": true,
+    "ponytail@ponytail": true,
+    "openhop@openhop": true
+  },
+  "extraKnownMarketplaces": {
+    "context-mode": {
+      "source": {
+        "source": "github",
+        "repo": "mksglu/context-mode"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    },
+    "openhop": {
+      "source": {
+        "source": "github",
+        "repo": "naorsabag/openhop"
+      }
+    }
+  },
+  "skipWorkflowUsageWarning": true,
+  "tui": "fullscreen"
+}
