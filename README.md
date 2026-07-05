@@ -21,7 +21,7 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 | [`reviewer-roulette/`](skills/reviewer-roulette/) | ✅ Yes — needs `docs/ownership-map.md` | Pick one reviewer from git history + ownership map |
 | [`reindex-docs/`](skills/reindex-docs/) | Partial — uses monorepo build scripts | Pattern is general; script invocation is build-tool-specific |
 | [`linkedin-post-engine/`](skills/linkedin-post-engine/) | ❌ No — personal content skill (Oded's voice) | Imported from grok/ClawHub; keeps provenance files |
-| [`expected-value-calculator/`](skills/expected-value-calculator/) | ❌ No — personal finance/trading; needs a real data source | Imported from grok/ClawHub |
+| [`expected-value-calculator/`](skills/expected-value-calculator/) | ✅ Yes | Finance/investing (not a SWE skill), but fully reusable: self-contained live data via `yfinance` + deterministic EV math. Imported from grok/ClawHub |
 
 > Note: some skills are imported from the grok/ClawHub marketplace and retain their `_meta.json` / `skill-card.md` provenance files.
 

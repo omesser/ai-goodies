@@ -1,0 +1,41 @@
+name: PR Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    # Add permissions for OIDC token
+    permissions:
+      id-token: write
+      contents: read
+
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install shfmt
+        run: |
+          curl -L "$(curl -s https://api.github.com/repos/mvdan/sh/releases/latest | grep -o -E -m 1 "https://.+?linux_amd64")" > shfmt \
+          && chmod +x shfmt && sudo mv shfmt /usr/bin/
+
+      - name: Install shellcheck
+        run: |
+          sudo apt update && sudo apt install shellcheck
+
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files --show-diff-on-failure
+  
