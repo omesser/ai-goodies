@@ -1,10 +1,10 @@
-# Agent guide — Prisma Photonics
+# Agent guide — Company
 
-Reference for agents operating on Prisma codebases or using tools from this repo.
+Reference for agents operating on Company codebases or using tools from this repo.
 
 ## Organization context
 
-- **Company:** Prisma Photonics
+- **Company:** Company name
 - **Primary language stack:** check the target repo's CLAUDE.md for specifics.
 - **Internal systems:** prefer asking a human before accessing internal APIs you haven't used before.
 

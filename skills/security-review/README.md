@@ -1,6 +1,6 @@
 # security-review skill
 
-Runs live security scans on the current repo, interprets findings, then applies Prisma Photonics' Secure SDLC and Change Management compliance framework to produce a verdict.
+Runs live security scans on the current repo, interprets findings, then applies Company's Secure SDLC and Change Management compliance framework to produce a verdict.
 
 ## What it runs
 
@@ -19,7 +19,7 @@ Tools are auto-detected from repo contents. Missing tools are noted and skipped 
 
 ## What it checks (compliance framework)
 
-- Change classification (Low-Risk / Normal/Material / Emergency) per Prisma's Change Management Policy
+- Change classification (Low-Risk / Normal/Material / Emergency) per Company's Change Management Policy
 - Threat modeling triggers (SDLC §3.2)
 - Security Engineering review triggers (Change Management §6.3)
 - SDLC gates: peer review, SAST, SCA, secrets, IaC, container scanning
@@ -32,7 +32,7 @@ Tools are auto-detected from repo contents. Missing tools are noted and skipped 
 | Script | Purpose |
 |---|---|
 | `scan.sh` | Orchestrator — parallel execution, flag parsing, project detection, calls companions |
-| `scan-patterns.sh` | Prisma-specific grep patterns: TLS disabled, auth bypass, SQL f-strings, eval/exec, AI/ML risks |
+| `scan-patterns.sh` | Company-specific grep patterns: TLS disabled, auth bypass, SQL f-strings, eval/exec, AI/ML risks |
 | `scan-ai.sh` | AI/GenAI artifact inventory and GenAI Use Policy compliance checks |
 
 All three scripts must be placed together (same directory) — `scan.sh` discovers companions via `SCRIPT_DIR`.
@@ -98,8 +98,8 @@ go install golang.org/x/vuln/cmd/govulncheck@latest
 ## Policies
 
 Grounded in:
-- [Secure Development Life Cycle (SDLC) Policy — Full](https://prismaphotonics.atlassian.net/wiki/spaces/PRISMATEAM/pages/2360770721/Secure+Development+Life+Cycle+SDLC+Policy+-+Full)
-- [Change Management Policy](https://prismaphotonics.atlassian.net/wiki/spaces/PRISMATEAM/pages/2857172997/Change+Management+Policy)
-- [Generative AI Use and Oversight Policy for Engineering](https://docs.google.com/document/d/1D1t7QE4LbS_ejfXZp-qOTFMs1LHrldvo5Pnt0APZsGk/edit?usp=sharing)
+- Secure Development Life Cycle (SDLC) Policy — Full (link redacted)
+- Change Management Policy (link redacted)
+- Generative AI Use and Oversight Policy for Engineering (link redacted)
 
-All maintained by Prisma Photonics. The links above require authentication; the skill itself is self-contained and needs no access to them at runtime.
+All maintained by Company. The links above require authentication; the skill itself is self-contained and needs no access to them at runtime.

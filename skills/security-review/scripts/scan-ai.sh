@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# AI / GenAI artifact scanner for Prisma's GenAI Use and Oversight Policy.
+# AI / GenAI artifact scanner for Company's GenAI Use and Oversight Policy.
 #
 # Scans for: AI config files (CLAUDE.md, AGENTS.md, .mcp.json, Cursor, Copilot,
 # Continue), secrets in AI configs, MCP tool scope, settings permission flags,
@@ -280,7 +280,7 @@ else
   echo "Files using AI SDKs:"
   indent "$AI_SDK_FILES"
   echo ""
-  echo "Providers referenced (check each is on Prisma's approved AI tools list):"
+  echo "Providers referenced (check each is on approved AI tools list):"
   # Extract provider names from imports/usage
   while IFS= read -r f; do
     [[ -f "$f" ]] && grep -oE \

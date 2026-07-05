@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prisma security scanner — parallel, auto-detecting, structured for Claude.
+# Company security scanner — parallel, auto-detecting, structured for Claude.
 #
 # Usage: bash scan.sh [options]
 #   --changed-only          Only scan files changed vs main (faster on large repos)
@@ -14,7 +14,7 @@
 #           js go trivy ml ai
 #
 # Companion scripts (auto-loaded from same directory):
-#   scan-patterns.sh  — grep-based Prisma-specific bad-pattern checks
+#   scan-patterns.sh  — grep-based Company-specific bad-pattern checks
 #   scan-ai.sh        — AI/GenAI artifact and compliance checks
 
 set -uo pipefail
@@ -228,7 +228,7 @@ do_patterns() {
   if [[ -f "$script" ]]; then
     if [[ $CHANGED_ONLY -eq 1 ]]; then bash "$script" --changed-only; else bash "$script"; fi
   else
-    warn "scan-patterns.sh not found in $SCRIPT_DIR — Prisma pattern checks skipped"
+    warn "scan-patterns.sh not found in $SCRIPT_DIR — Company pattern checks skipped"
     skip "patterns (install: cp scan-patterns.sh alongside scan.sh)"
   fi
 }
