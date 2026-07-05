@@ -147,13 +147,10 @@ def github_headers(token: str) -> Dict[str, str]:
     return headers
 
 
-def fetch_pr(repo_full_name: str, pr_number: int, headers: Dict[str, str]) -> Dict[str, Any]:
-    url = (
-        "https://api.github.com/repos/"
-        + repo_full_name
-        + "/pulls/"
-        + str(pr_number)
-    )
+def fetch_pr(
+    repo_full_name: str, pr_number: int, headers: Dict[str, str]
+) -> Dict[str, Any]:
+    url = "https://api.github.com/repos/" + repo_full_name + "/pulls/" + str(pr_number)
     pr = http_get_json(url, headers=headers)
     return {
         "id": pr.get("id", pr_number),
@@ -256,7 +253,9 @@ def main() -> int:
         pr_number = extract_pr_number(commit)
         commit_out = dict(commit)
         commit_out["pr_number"] = pr_number
-        commit_out["github_pr"] = prs_by_number.get(pr_number) if pr_number is not None else None
+        commit_out["github_pr"] = (
+            prs_by_number.get(pr_number) if pr_number is not None else None
+        )
         enriched_commits.append(commit_out)
 
     json.dump(enriched_commits, sys.stdout, ensure_ascii=True, indent=2)
