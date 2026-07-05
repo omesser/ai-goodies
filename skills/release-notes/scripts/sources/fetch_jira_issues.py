@@ -105,7 +105,9 @@ def read_commits(path: str) -> List[Dict[str, Any]]:
 def extract_jira_keys(commit: Dict[str, Any]) -> List[str]:
     existing = commit.get("jira_keys")
     if isinstance(existing, list):
-        return ordered_unique([str(item).strip() for item in existing if str(item).strip()])
+        return ordered_unique(
+            [str(item).strip() for item in existing if str(item).strip()]
+        )
 
     text = "\n".join(
         [
@@ -159,9 +161,15 @@ def main() -> int:
         sys.stdout.write("\n")
         return 0
 
-    missing = [k for k, v in [("ATLASSIAN_BASE_URL", base_url), ("EMAIL", email)] if not v]
+    missing = [
+        k for k, v in [("ATLASSIAN_BASE_URL", base_url), ("EMAIL", email)] if not v
+    ]
     if missing:
-        sys.stderr.write("Missing required environment values for Jira enrichment: " + ", ".join(missing) + "\n")
+        sys.stderr.write(
+            "Missing required environment values for Jira enrichment: "
+            + ", ".join(missing)
+            + "\n"
+        )
         return 1
 
     auth = base64.b64encode(f"{email}:{jira_token}".encode("utf-8")).decode("ascii")
@@ -198,18 +206,28 @@ def main() -> int:
                 "url": base_url.rstrip("/") + "/browse/" + key,
             }
         except HTTPError as err:
-            issues_by_key[key] = {"key": key, "error": f"HTTP {err.code}", "details": err.reason}
+            issues_by_key[key] = {
+                "key": key,
+                "error": f"HTTP {err.code}",
+                "details": err.reason,
+            }
         except URLError as err:
             issues_by_key[key] = {"key": key, "error": "network", "details": str(err)}
         except Exception as err:
-            issues_by_key[key] = {"key": key, "error": "unexpected", "details": str(err)}
+            issues_by_key[key] = {
+                "key": key,
+                "error": "unexpected",
+                "details": str(err),
+            }
 
     enriched_commits: List[Dict[str, Any]] = []
     for commit in commits:
         keys = extract_jira_keys(commit)
         commit_out = dict(commit)
         commit_out["jira_keys"] = keys
-        commit_out["jira_issues"] = [issues_by_key[key] for key in keys if key in issues_by_key]
+        commit_out["jira_issues"] = [
+            issues_by_key[key] for key in keys if key in issues_by_key
+        ]
         enriched_commits.append(commit_out)
 
     json.dump(enriched_commits, sys.stdout, ensure_ascii=True, indent=2)

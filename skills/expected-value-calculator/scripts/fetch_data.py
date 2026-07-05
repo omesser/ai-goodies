@@ -5,6 +5,7 @@
 """Fetch live market data for EV analysis. Run: uv run fetch_data.py AAPL NVDA
 Prints JSON. Every field independently degrades to null on failure — never a fake value.
 """
+
 import json
 import sys
 from datetime import datetime, timezone
@@ -45,7 +46,8 @@ def earnings_history(tk):
         "beats": beats,
         "beat_rate": round(beats / total, 2) if total else None,
         "avg_surprise_pct": round(float(df.surprisePercent.mean()) * 100, 1)
-        if df.surprisePercent.notna().any() else None,
+        if df.surprisePercent.notna().any()
+        else None,
     }
 
 
@@ -63,10 +65,17 @@ def fetch(ticker):
     try:
         info = tk.info
         out["price"] = info.get("currentPrice") or info.get("regularMarketPrice")
-        out["fifty_two_week"] = {"low": info.get("fiftyTwoWeekLow"), "high": info.get("fiftyTwoWeekHigh")}
+        out["fifty_two_week"] = {
+            "low": info.get("fiftyTwoWeekLow"),
+            "high": info.get("fiftyTwoWeekHigh"),
+        }
         out["beta"] = info.get("beta")
         ts = info.get("earningsTimestamp")
-        out["next_earnings"] = datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat() if ts else None
+        out["next_earnings"] = (
+            datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()
+            if ts
+            else None
+        )
     except Exception as e:
         out["price"] = None
         out["error_info"] = str(e)

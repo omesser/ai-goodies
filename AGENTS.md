@@ -18,9 +18,11 @@ Treat everything here as a **library of reference material**, not a running appl
 
 4. **Preserve provenance.** Skills imported from a marketplace (e.g. grok/ClawHub) keep their provenance files (`_meta.json`, `skill-card.md`) as-is, and their origin is noted in the README.
 
-5. **Git: never commit or push without explicit approval.**
+5. **Run pre-commit after every change and fix all violations before you're done.** After editing any file, run `pre-commit run --all-files` and resolve every reported issue (re-run until it passes clean). A task is not complete while hooks are failing. Don't disable, skip (`--no-verify`), or add blanket ignores to get past a hook — fix the underlying issue.
 
-6. **Stay minimal and proportional.** Make the smallest change that satisfies the request. Ask before broad or destructive edits.
+6. **Git: never commit or push without explicit approval.**
+
+7. **Stay minimal and proportional.** Make the smallest change that satisfies the request. Ask before broad or destructive edits.
 
 ## Conventions
 
