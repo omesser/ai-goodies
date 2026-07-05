@@ -63,6 +63,5 @@ skills/my-skill/
 ## Good examples in this repo
 
 - [`security-review/`](../skills/security-review/) — 7-phase workflow with compliance gates, companion scripts, auto-scoping
-- [`openhop/`](../skills/openhop/) — rich schema reference, phase-based build loop, validation gates
 - [`release-notes/`](../skills/release-notes/) — optional external enrichment, graceful degradation
 - [`reviewer-roulette/`](../skills/reviewer-roulette/) — minimal, single-outcome skill (pick one reviewer)
