@@ -297,7 +297,7 @@ Before finalizing:
 
 ## Judging Criteria for Oded-Calibrated Posts
 
-Use this checklist when generating or evaluating posts that should match Oded's voice. 
+Use this checklist when generating or evaluating posts that should match Oded's voice.
 
 **Important**: When the post is in Hebrew, adjust expectations — the tone is generally more conversational, warm, and storytelling-driven than in English (see "Hebrew vs English Voice Differences" above). Do not force the sharp English executive tone into Hebrew posts.
 

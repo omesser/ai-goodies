@@ -1,0 +1,26 @@
+[
+  {
+    "ticker": "AAPL",
+    "shares": 100,
+    "cost_basis": 175.0,
+    "price": 213.5,
+    "stop_loss": 165.0,
+    "scenarios": [
+      { "name": "bull", "prob": 0.25, "target": 245.0 },
+      { "name": "base", "prob": 0.5, "target": 220.0 },
+      { "name": "bear", "prob": 0.25, "target": 185.0 }
+    ]
+  },
+  {
+    "ticker": "NVDA",
+    "shares": 50,
+    "cost_basis": 120.0,
+    "price": 128.0,
+    "stop_loss": 105.0,
+    "scenarios": [
+      { "name": "bull", "prob": 0.35, "target": 165.0 },
+      { "name": "base", "prob": 0.45, "target": 135.0 },
+      { "name": "bear", "prob": 0.2, "target": 100.0 }
+    ]
+  }
+]
