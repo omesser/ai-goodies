@@ -92,5 +92,10 @@ def _self_check():
 
 if __name__ == "__main__":
     _self_check()
-    raw = open(sys.argv[1]).read() if len(sys.argv) > 1 else sys.stdin.read()
+    if len(sys.argv) > 1:
+        raw = open(sys.argv[1]).read()
+    elif not sys.stdin.isatty():
+        raw = sys.stdin.read()
+    else:
+        sys.exit("usage: python3 ev.py positions.json   (or pipe JSON to stdin)")
     main(json.loads(raw))
