@@ -63,6 +63,32 @@ These are open-source Claude Code skills — install directly rather than copyin
 | `last30days` | https://github.com/mvanhorn/last30days-skill | `claude plugin install last30days --from github:mvanhorn/last30days-skill` | Researches what people actually said about any topic in the last 30 days across Reddit, X, YouTube, TikTok, Hacker News, Polymarket, GitHub, and the web, scored by real engagement (upvotes, likes, market money). Includes a doctor health check for its sources. |
 | `drawio-skill` | https://github.com/Agents365-ai/drawio-skill | `npx skills add Agents365-ai/365-skills -g` (or `git clone https://github.com/Agents365-ai/drawio-skill.git ~/.claude/skills/drawio-skill`) | Turns natural language into editable `.drawio` diagrams (exports PNG/SVG/PDF/JPG) via the draw.io desktop CLI. 7 presets (ERD, UML, sequence, C4, architecture, ML, flowchart), Mermaid→.drawio, codebase/IaC/SQL→diagram, 10k+ official shapes + AI/LLM brand logos, vision self-check + iterative refinement. Needs the draw.io desktop CLI (`brew install --cask drawio`). |
 
+## Skill marketplaces & skill sources
+
+Not individual skills — curated marketplaces, directories, and first-party skill repos worth browsing when you need a new capability.
+
+| Source | Who's behind it | What it is | Why it's worth your time |
+|--------|-----------------|------------|--------------------------|
+| [anthropics/skills](https://github.com/anthropics/skills) | Anthropic (official) | Official Agent Skills repo, doubles as a plugin marketplace (`/plugin marketplace add anthropics/skills`) | The reference implementation: document skills (docx/xlsx/pptx/pdf), `skill-creator`, and the canonical skill template. Start here. |
+| [obra/superpowers](https://github.com/obra/superpowers) | Jesse Vincent (obra) | A full software-development methodology shipped as skills: TDD, planning, debugging, verification | ~121k stars; the most thought-per-skill in the ecosystem. Endorsed in depth by Simon Willison. Works across Claude Code, Codex, Cursor, and more. |
+| [trailofbits/skills](https://github.com/trailofbits/skills) | Trail of Bits | Plugin marketplace of 17+ security skills: CodeQL/Semgrep static analysis, variant analysis, differential code review, audit workflows | The gold standard for security skills, from one of the most respected security research firms. |
+| [skills.sh](https://www.skills.sh) ([vercel-labs/skills](https://github.com/vercel-labs/skills)) | Vercel | The "npm for skills": `npx skills add <owner>/<repo>` installs into 50+ agents; directory with install-based leaderboard | 410k+ installs; the leaderboard surfaces what people actually use, not just what's starred. Best discovery surface. |
+| [VoltAgent/awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) | VoltAgent + community | Curated index of 1000+ skills, anchored on official skills from real dev teams (Anthropic, Vercel, Stripe, Cloudflare, Sentry, Hugging Face, Figma…) | The best-maintained awesome-list; filters first-party, thoughtfully-built skills from the sea of bulk-generated ones. |
+
+### Skill sources - private GitHub accounts
+
+Personally-maintained skill sources — one person's own workflow, published. Higher thought-per-skill than any marketplace; vetted for personal maintenance and activity (as of July 2026).
+
+| Source | Who | What it is | Why it's worth your time |
+|--------|-----|------------|--------------------------|
+| [mattpocock/skills](https://github.com/mattpocock/skills) | Matt Pocock | "Skills for Real Engineers" — straight from his own `.claude` directory: `tdd`, `grill-me`, `to-prd`, `triage`… | ~158k stars, pushed daily; the category-defining personal skills repo. |
+| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | Addy Osmani (Chrome eng lead) | 24 structured SKILL.md lifecycle skills for Claude Code / Codex / Cursor / Gemini; siblings: [web-quality-skills](https://github.com/addyosmani/web-quality-skills), [adverse](https://github.com/addyosmani/adverse) | ~70k stars, active weekly; reference-quality full-lifecycle pack plus a whole portfolio of focused skill repos. |
+| [danielmiessler/Fabric](https://github.com/danielmiessler/Fabric) + [LifeOS](https://github.com/danielmiessler/LifeOS) | Daniel Miessler | Fabric: the original curated AI prompt/pattern framework. LifeOS (ex-PAI): his personal-AI-infrastructure repo with skills + commands | ~43k + ~16k stars, both active this month; the longest-running thoughtful prompt-pattern ecosystem by one person. |
+| [wshobson/agents](https://github.com/wshobson/agents) + [commands](https://github.com/wshobson/commands) | Seth Hobson | Multi-harness subagent/plugin marketplace (Claude Code, Codex, Cursor, OpenCode) | ~38k stars, evolved daily; the canonical personally-maintained subagents collection. |
+| [steipete/agent-rules](https://github.com/steipete/agent-rules) + [agent-scripts](https://github.com/steipete/agent-scripts) | Peter Steinberger (founder of PSPDFKit) | Directly copyable rules/commands for Claude Code & Cursor, plus the shared scripts behind his agent setups | ~5.7k + ~5.3k stars, pushed continuously; smaller audience, highest thought-per-line. |
+
+Near-misses worth watching: Steve Yegge's [beads/gastown](https://github.com/steveyegge/beads) agent-workflow stack (~25k, more tool than skill source), Hamel Husain's [evals-skills](https://github.com/hamelsmu/evals-skills) (evals authority, small but sharp), and Armin Ronacher's [agent-stuff](https://github.com/mitsuhiko/agent-stuff).
+
 ## Installed plugins (global settings)
 
 | Plugin | Repo | What it does |
