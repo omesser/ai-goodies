@@ -75,7 +75,7 @@ Not individual skills — curated marketplaces, directories, and first-party ski
 | [skills.sh](https://www.skills.sh) ([vercel-labs/skills](https://github.com/vercel-labs/skills)) | Vercel | The "npm for skills": `npx skills add <owner>/<repo>` installs into 50+ agents; directory with install-based leaderboard | 410k+ installs; the leaderboard surfaces what people actually use, not just what's starred. Best discovery surface. |
 | [VoltAgent/awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) | VoltAgent + community | Curated index of 1000+ skills, anchored on official skills from real dev teams (Anthropic, Vercel, Stripe, Cloudflare, Sentry, Hugging Face, Figma…) | The best-maintained awesome-list; filters first-party, thoughtfully-built skills from the sea of bulk-generated ones. |
 
-### Additional OSS Skill sources (private GitHub accounts)
+### Skill sources - private GitHub accounts
 
 Personally-maintained skill sources — one person's own workflow, published. Higher thought-per-skill than any marketplace; vetted for personal maintenance and activity (as of July 2026).
 
