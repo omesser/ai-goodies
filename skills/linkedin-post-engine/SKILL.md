@@ -37,6 +37,8 @@ Thoughtful, systems-oriented observations from the trenches. Can include cynical
 - **Closings**: Prefer delivering authoritative insight, perspective, or direct advice from a senior technical leader over generic engagement-bait questions. The goal is to leave the reader with something sharp to think about, not just to fish for comments.
 - **Engagement**: Strong peer-to-peer CTA when used, but it should feel natural. Prioritizes intellectual substance, pragmatic insight, and leverage thinking over hype.
 
+Across career, leadership, and software engineering topics, favor posts with high insight density — specific mechanisms, tradeoffs, earned observations, and clear reasoning over generic advice or surface-level tips.
+
 Use this calibration when the user context is Oded's thought leadership voice or senior engineering leadership topics. Default to Primary mode unless the topic clearly calls for the Secondary mode.
 
 **Hebrew vs English Voice Differences**:
@@ -92,7 +94,7 @@ Then select 2-3 hooks and finalize one.
 
 - Keep paragraphs short (1-2 lines)
 - Front-load specifics
-- Remove generic filler
+- Remove generic filler; ensure key claims and advice include specific reasoning or mechanisms rather than surface statements
 - End with one clear CTA
 - Add 3-6 hashtags max
 
@@ -185,6 +187,8 @@ Template:
 - one mistake to avoid
 - one practical “do this today” action
 
+Bullets should reflect genuine insight density. If a point is thin or generic, deepen the reasoning or remove it — do not pad for length.
+
 When the post also has a contrarian angle on org/AI/leadership dynamics, blend in elements from the refined Contrarian Opinion template above (dominant narrative → pivot → personal lens → breakdown → incentive synthesis → peer CTA).
 
 ### 5) Build-in-Public Update
@@ -207,6 +211,7 @@ Use these to increase clarity and trust:
 - **Relevance**: Tie insight to audience reality.
 - **Clarity**: One post = one core idea.
 - **Grounded Realism on Role Impacts & Incentives**: When writing about AI, tools, or org change, explicitly analyze how the change affects different archetypes/roles differently (thriving vs. squeezed vs. sidelined vs. starved of investment). Highlight long-term effects on staff engineer composition, org health, or talent pipeline. Tie directly to senior engineering audience reality.
+- **Earned Insight**: Prioritize content where advice or observations feel earned: explain *why* something works (or fails), surface real tradeoffs or second-order effects, and use specific language rather than generic platitudes. This applies to the substance of what is said, regardless of post length or format.
 
 ---
 
@@ -310,3 +315,9 @@ Use this checklist when generating or evaluating posts that should match Oded's 
 - [ ] Uses unicode bold/italic or → arrows **only** when they meaningfully improve structure or scannability (not mechanically).
 - [ ] Avoids buzzword soup, generic "AI changes everything" claims, ranty negativity, and over-used LinkedIn formulas.
 - [ ] When natural, points to resources for readers who want to go deeper.
+
+**Insight Quality Rubric** (applies to posts with substantive claims or advice, regardless of length or format):
+- [ ] Core idea(s) feel earned and specific rather than generic or obvious.
+- [ ] Advice or observations include mechanisms, implications, or tradeoffs (not just "do X").
+- [ ] Content avoids shallow listicle syndrome: points have enough substance that they would still hold value if condensed.
+- [ ] Balanced, constructive framing on complex topics (especially AI/engineering shifts).
