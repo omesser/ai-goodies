@@ -11,6 +11,26 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 | [`settings/`](settings/) | `.claude/settings.json` examples (global + local) |
 | [`guides/`](guides/) | How-to prose: AGENTS.md, skills, plugins |
 
+## Installing a skill
+
+Every skill is a self-contained folder under [`skills/`](skills/) following the [Agent Skills](https://agentskills.io) open format — plain markdown, no build step, portable to any agent that supports the standard.
+
+**Cross-agent**, via the [skills.sh](https://www.skills.sh) installer — it detects the agents on your machine (Claude Code, Codex, Cursor, Gemini CLI, 50+ others) and installs into each one's skills directory:
+
+```bash
+npx skills add omesser/ai-goodies                             # interactive picker
+npx skills add omesser/ai-goodies --skill explain-to-manager  # just one skill
+```
+
+**Manually** — copy the folder into your agent's skills directory. The spec doesn't fix a location, so it depends on the agent: for Claude Code it's `~/.claude/skills/` (user-level) or `.claude/skills/` (project-level); `.agents/skills/` is a common agent-agnostic convention:
+
+```bash
+git clone https://github.com/omesser/ai-goodies
+cp -r ai-goodies/skills/explain-to-manager ~/.claude/skills/
+```
+
+Then invoke it in a new session — e.g. `/explain-to-manager` in Claude Code. Skills that need extra setup (e.g. `security-review`'s scanners) document it in their own README.
+
 ## Skills
 
 | Skill | General-purpose? | Notes |
@@ -98,5 +118,5 @@ Near-misses worth watching: Steve Yegge's [beads/gastown](https://github.com/ste
 
 1. Copy `templates/AGENTS-general.md` → `AGENTS.md`, edit org name and stack.
 2. Copy `templates/CLAUDE-*.md` that fits your stack → `CLAUDE.md`, strip project-specific sections.
-3. Install skills you want into `.claude/skills/<name>/` (or `~/.claude/skills/` for user-global).
+3. Install the skills you want — see [Installing a skill](#installing-a-skill).
 4. Copy `settings/settings.local.example.json` → `.claude/settings.local.json`, tune permissions. For global plugins/hooks, see `settings/settings.global.example.json`.
