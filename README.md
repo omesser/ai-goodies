@@ -22,6 +22,7 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 | [`reindex-docs/`](skills/reindex-docs/) | Partial — uses monorepo build scripts | Pattern is general; script invocation is build-tool-specific |
 | [`linkedin-post-engine/`](skills/linkedin-post-engine/) | ❌ No — personal content skill (Oded's voice) | Imported from grok/ClawHub; keeps provenance files |
 | [`expected-value-calculator/`](skills/expected-value-calculator/) | ✅ Yes | Finance/investing (not a SWE skill), but fully reusable: self-contained live data via `yfinance` + deterministic EV math. Imported from grok/ClawHub |
+| [`explain-to-manager/`](skills/explain-to-manager/) | ✅ Yes | Interview-driven manager briefs: status resets ("it's not ready / AI didn't 100x it"), spend proposals, and defenses of invisible work — trust-preserving, with hard-question prep |
 
 > Note: some skills are imported from the grok/ClawHub marketplace and retain their `_meta.json` / `skill-card.md` provenance files.
 
