@@ -32,3 +32,11 @@ nox -s lint    # must pass with zero Ruff errors
 - [ ] `nox -s lint` passes
 - [ ] `pyproject.toml` updated if new dependencies were added
 - [ ] Pre-commit hooks pass (`pre-commit run --all-files`)
+
+## Final verdict
+
+End the report with a short, concise summary (a few lines at most) followed by a single overall verdict:
+
+**PROD-READY: PASS** or **PROD-READY: FAIL**
+
+FAIL if any check found a real issue; checks that don't apply to the repo count as pass. On FAIL, list the blocking issues, one line each.
