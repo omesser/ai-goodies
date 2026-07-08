@@ -13,24 +13,23 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 
 ## Installing a skill
 
-Every skill is a self-contained folder under [`skills/`](skills/) — plain markdown, no build step.
+Every skill is a self-contained folder under [`skills/`](skills/) following the [Agent Skills](https://agentskills.io) open format — plain markdown, no build step, portable to any agent that supports the standard.
 
-Via [skills.sh](https://www.skills.sh) (Claude Code, Codex, Cursor, and 50+ agents):
+**Cross-agent**, via the [skills.sh](https://www.skills.sh) installer — it detects the agents on your machine (Claude Code, Codex, Cursor, Gemini CLI, 50+ others) and installs into each one's skills directory:
 
 ```bash
 npx skills add omesser/ai-goodies                             # interactive picker
 npx skills add omesser/ai-goodies --skill explain-to-manager  # just one skill
 ```
 
-Or copy the folder:
+**Manually** — copy the folder into your agent's skills directory. The spec doesn't fix a location, so it depends on the agent: for Claude Code it's `~/.claude/skills/` (user-level) or `.claude/skills/` (project-level); `.agents/skills/` is a common agent-agnostic convention:
 
 ```bash
 git clone https://github.com/omesser/ai-goodies
-cp -r ai-goodies/skills/explain-to-manager ~/.claude/skills/   # user-level (all projects)
-# or into <your-repo>/.claude/skills/ for project-level
+cp -r ai-goodies/skills/explain-to-manager ~/.claude/skills/
 ```
 
-Then invoke with `/explain-to-manager` in a new session. Skills that need extra setup (e.g. `security-review`'s scanners) document it in their own README.
+Then invoke it in a new session — e.g. `/explain-to-manager` in Claude Code. Skills that need extra setup (e.g. `security-review`'s scanners) document it in their own README.
 
 ## Skills
 
