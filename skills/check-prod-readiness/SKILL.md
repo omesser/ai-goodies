@@ -1,3 +1,9 @@
+---
+name: check-prod-readiness
+description: Run a production-readiness checklist on the repo before merging — config hygiene (no hardcoded URIs, absolute paths, or secrets), code checks, and Python quality gates (nox tests/lint, pre-commit). Use when asked whether changes are ready for production, before merging to a production branch, or on "check prod readiness" / "is this prod-ready".
+compatibility: Quality gates assume a Python repo with nox and pre-commit; config and code checks are stack-agnostic.
+---
+
 # Check Production Readiness
 
 Run through this checklist before merging changes intended for production.
@@ -26,11 +32,3 @@ nox -s lint    # must pass with zero Ruff errors
 - [ ] `nox -s lint` passes
 - [ ] `pyproject.toml` updated if new dependencies were added
 - [ ] Pre-commit hooks pass (`pre-commit run --all-files`)
-
-## Final verdict
-
-End the report with a short, concise summary (a few lines at most) followed by a single overall verdict:
-
-**PROD-READY: PASS** or **PROD-READY: FAIL**
-
-FAIL if any check found a real issue; checks that don't apply to the repo count as pass. On FAIL, list the blocking issues, one line each.
