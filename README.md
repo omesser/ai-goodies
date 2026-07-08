@@ -11,6 +11,27 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 | [`settings/`](settings/) | `.claude/settings.json` examples (global + local) |
 | [`guides/`](guides/) | How-to prose: AGENTS.md, skills, plugins |
 
+## Installing a skill
+
+Every skill is a self-contained folder under [`skills/`](skills/) — plain markdown, no build step.
+
+Via [skills.sh](https://www.skills.sh) (Claude Code, Codex, Cursor, and 50+ agents):
+
+```bash
+npx skills add omesser/ai-goodies                             # interactive picker
+npx skills add omesser/ai-goodies --skill explain-to-manager  # just one skill
+```
+
+Or copy the folder:
+
+```bash
+git clone https://github.com/omesser/ai-goodies
+cp -r ai-goodies/skills/explain-to-manager ~/.claude/skills/   # user-level (all projects)
+# or into <your-repo>/.claude/skills/ for project-level
+```
+
+Then invoke with `/explain-to-manager` in a new session. Skills that need extra setup (e.g. `security-review`'s scanners) document it in their own README.
+
 ## Skills
 
 | Skill | General-purpose? | Notes |

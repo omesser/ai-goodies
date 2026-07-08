@@ -1,6 +1,6 @@
 ---
 name: linkedin-post-engine
-description: Write high-performing, persuasive, and authentic LinkedIn posts across any professional niche. Uses research-backed hooks, proven post structures, and LinkedIn-specific formatting to maximize reach, saves, comments, and profile actions. Can be calibrated to a specific author's voice and standards (default: Oded's senior engineering leadership voice) for thought-leadership and senior-technical-leadership topics. Use when creating LinkedIn posts, carousels-by-text, thought leadership, founder updates, case studies, hiring posts, launch posts, or converting X/Twitter ideas into LinkedIn content.
+description: "Write high-performing, persuasive, and authentic LinkedIn posts across any professional niche. Uses research-backed hooks, proven post structures, and LinkedIn-specific formatting to maximize reach, saves, comments, and profile actions. Can be calibrated to a specific author's voice and standards (default: Oded's senior engineering leadership voice) for thought-leadership and senior-technical-leadership topics. Use when creating LinkedIn posts, carousels-by-text, thought leadership, founder updates, case studies, hiring posts, launch posts, or converting X/Twitter ideas into LinkedIn content."
 ---
 
 # LinkedIn Post Engine
