@@ -1,14 +1,14 @@
 # AGENTS.md
 
-This repo is a curated collection of reference AI/agentic-engineering artifacts — skills, templates, guides, commands, and settings — meant to be read, copied, and adapted into other repos. See [`README.md`](README.md) for the full map of what lives where.
+This repo is a curated collection of reference AI/agentic-engineering artifacts — skills, templates, guides, and settings — meant to be read, copied, and adapted into other repos. See [`README.md`](README.md) for the full map of what lives where.
 
 Treat everything here as a **library of reference material**, not a running application. There is nothing to build or deploy; the value is in keeping the artifacts clean, accurate, and well-catalogued.
 
 ## Operating rules
 
-1. **Don't modify existing artifacts without explicit approval.** Skills, templates, guides, commands, and settings are curated. Do not edit, refactor, "clean up," or rewrite an existing file unless the user explicitly asks for that specific change. When you spot problems, report them and wait — don't fix proactively.
+1. **Don't modify existing artifacts without explicit approval.** Skills, templates, guides, and settings are curated. Do not edit, refactor, "clean up," or rewrite an existing file unless the user explicitly asks for that specific change. When you spot problems, report them and wait — don't fix proactively.
 
-2. **Keep `README.md` in sync.** Any change that adds, removes, renames, or relocates a skill (or template / guide / command) MUST update the matching table in [`README.md`](README.md) in the same change. The README is the catalog; a drifting catalog is a bug.
+2. **Keep `README.md` in sync.** Any change that adds, removes, renames, or relocates a skill (or template / guide) MUST update the matching table in [`README.md`](README.md) in the same change. The README is the catalog; a drifting catalog is a bug.
 
 3. **Review skills before adding them.** When importing or creating a skill, check it first and surface issues before it lands:
    - Frontmatter is valid: `name` matches the directory, `description` states clear trigger conditions.

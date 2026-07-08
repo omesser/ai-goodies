@@ -8,7 +8,6 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 |-----------|----------|
 | [`templates/`](templates/) | AGENTS.md and CLAUDE.md starters for different project types |
 | [`skills/`](skills/) | Claude Code slash-command skills (`.claude/skills/` or `.agents/skills/`) |
-| [`commands/`](commands/) | Example `.claude/commands/` files (project-specific slash commands) |
 | [`settings/`](settings/) | `.claude/settings.json` examples (global + local) |
 | [`guides/`](guides/) | How-to prose: AGENTS.md, skills, plugins |
 
@@ -23,6 +22,7 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 | [`linkedin-post-engine/`](skills/linkedin-post-engine/) | ❌ No — personal content skill (Oded's voice) | Imported from grok/ClawHub; keeps provenance files |
 | [`expected-value-calculator/`](skills/expected-value-calculator/) | ✅ Yes | Finance/investing (not a SWE skill), but fully reusable: self-contained live data via `yfinance` + deterministic EV math. Imported from grok/ClawHub |
 | [`explain-to-manager/`](skills/explain-to-manager/) | ✅ Yes | Interview-driven manager briefs: status resets ("it's not ready / AI didn't 100x it"), spend proposals, and defenses of invisible work — trust-preserving, with hard-question prep |
+| [`check-prod-readiness/`](skills/check-prod-readiness/) | Partial — checklist is general; quality gates assume Python + nox | Pre-merge production-readiness gate: config hygiene, code checks, nox tests/lint, pre-commit |
 
 > Note: some skills are imported from the grok/ClawHub marketplace and retain their `_meta.json` / `skill-card.md` provenance files.
 
@@ -39,10 +39,6 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 | [`CLAUDE-python-ml-pipeline.md`](templates/CLAUDE-python-ml-pipeline.md) | ML inference pipeline: config, predictors, tests, lint |
 | [`CLAUDE-fullstack-app.md`](templates/CLAUDE-fullstack-app.md) | CDK + Lambda + PWA; good general workflow preferences section |
 | [`CLAUDE-fastapi-react-app.md`](templates/CLAUDE-fastapi-react-app.md) | FastAPI + React + SQLite; RBAC, module system, air-gapped |
-
-## Commands
-
-Commands in `.claude/commands/` become `/command-name` in Claude Code. These examples are ML-pipeline-specific, but the patterns (readiness checklist, step-by-step workflow guide, run-local) transfer to any project.
 
 ## Guides
 
@@ -104,4 +100,3 @@ Near-misses worth watching: Steve Yegge's [beads/gastown](https://github.com/ste
 2. Copy `templates/CLAUDE-*.md` that fits your stack → `CLAUDE.md`, strip project-specific sections.
 3. Install skills you want into `.claude/skills/<name>/` (or `~/.claude/skills/` for user-global).
 4. Copy `settings/settings.local.example.json` → `.claude/settings.local.json`, tune permissions. For global plugins/hooks, see `settings/settings.global.example.json`.
-5. Add slash commands to `.claude/commands/` as needed.
