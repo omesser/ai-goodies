@@ -2,11 +2,13 @@
 
 Run through this checklist before merging changes intended for production.
 
-## Config checks (`orion_prod.yaml`)
+## Config checks
+If the repo has any json/yml/yaml/toml/cfg/ini or any other configuration files, evaluate them for these conditions:
 
 - [ ] No URI / link values are hardcoded. if any are constructed make sure they are secure (no http, ssh, ftp or a non secure protocol)
 - [ ] File paths are relative. Raise a flag for any hardcoded absolute paths.
 - [ ] No Windows paths
+- [ ] No secrets, passwords, API keys, or anything the resembles secrets. Before flagging a "secret" check if it looks like a placeholder value, it is sometimes evident from the value of a secret/password config key.
 
 ## Code checks
 
@@ -20,7 +22,15 @@ nox -s tests   # must pass with 100% coverage
 nox -s lint    # must pass with zero Ruff errors
 ```
 
-- [ ] `nox -s tests` passes
+- [ ] `nox -s tests` passes (if no 'tests' session, check noxfile.py for unit-tests resembling session)
 - [ ] `nox -s lint` passes
 - [ ] `pyproject.toml` updated if new dependencies were added
 - [ ] Pre-commit hooks pass (`pre-commit run --all-files`)
+
+## Final verdict
+
+End the report with a short, concise summary (a few lines at most) followed by a single overall verdict:
+
+**PROD-READY: PASS** or **PROD-READY: FAIL**
+
+FAIL if any check found a real issue; checks that don't apply to the repo count as pass. On FAIL, list the blocking issues, one line each.
