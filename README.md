@@ -119,5 +119,5 @@ Near-misses worth watching: Steve Yegge's [beads/gastown](https://github.com/ste
 
 1. Copy `templates/AGENTS-general.md` → `AGENTS.md`, edit org name and stack.
 2. Copy `templates/CLAUDE-*.md` that fits your stack → `CLAUDE.md`, strip project-specific sections.
-3. Install skills you want into `.claude/skills/<name>/` (or `~/.claude/skills/` for user-global).
+3. Install the skills you want — see [Installing a skill](#installing-a-skill).
 4. Copy `settings/settings.local.example.json` → `.claude/settings.local.json`, tune permissions. For global plugins/hooks, see `settings/settings.global.example.json`.
