@@ -28,13 +28,13 @@ Direct, no-BS, experienced, highly technical. Willing to call things out clearly
 **Secondary mode — Strong Technical Peer / Staff+ Leader**  
 Thoughtful, systems-oriented observations from the trenches. Can include cynical/sarcastic edge when it sharpens a point. Self-aware and grounded.
 
-**Tertiary mode — Playful / Archetype Series**  
-Light, fun, slightly mischievous, observational posts about workplace patterns and archetypes (often as a series with images).  
+**Tertiary mode — Playful**  
+Light, fun, slightly mischievous, observational posts.  
 Prioritizes recognition value, dry humor, and "I've seen this too" energy over deep diagnostic leverage.  
-Self-aware and humble (including light self-owning closes like "I've been the seagull once or twice"), but never bitter, victim-y, or heavy.  
+Self-aware and humble (a light self-owning close lands well), but never bitter, victim-y, or heavy.  
 Allows entertainment-oriented hooks, series framing ("I keep running into these..."), and snarky-but-protective disclaimers.  
 Still keeps short paragraphs, deliberate negative space, and a sharp closing insight.  
-Best for image-driven series and lighter recognition content.
+Best for lighter recognition content, including image-driven series.
 
 **Shared characteristics across Primary and Secondary modes**:
 - **Hook style**: Strong, non-generic hooks that acknowledge the dominant positive narrative first, then reveal the disguised problem or hidden cost. Avoid boilerplate LinkedIn openers ("Most teams...", "Everyone is celebrating..."). Best hooks feel original and diagnostic.
@@ -50,7 +50,7 @@ Across career, leadership, and software engineering topics, favor posts with hig
 Use this calibration when the user context is Oded's thought leadership voice or senior engineering leadership topics.  
 - Default to **Primary mode**.  
 - Use **Secondary mode** for thoughtful trench / personal leadership reflections.  
-- Use **Tertiary mode** when the user is creating a fun series of workplace metaphors/archetypes (especially with Grok Imagine images) or explicitly wants a lighter, cheekier, more entertainment-oriented register.
+- Use **Tertiary mode** when the user explicitly wants a lighter, cheekier, more entertainment-oriented register (often fun observational series, with or without images).
 
 **Hebrew vs English Voice Differences**:
 When writing in Hebrew, Oded's tone tends to shift noticeably toward a more conversational, warm, and storytelling-driven style:
@@ -71,7 +71,7 @@ https://www.linkedin.com/posts/odedmesser_staff-archetypes-activity-747378849774
 **English - Secondary Example** (personal leadership reflection + team autonomy, light sarcasm):
 https://www.linkedin.com/posts/odedmesser_im-back-to-work-well-for-a-day-kinda-activity-7444373275662696449-TxSG
 
-**English - Tertiary / Playful Archetype Series Example** (light, fun, self-aware workplace metaphor):  
+**English - Tertiary / Playful Example** (light, fun, self-aware workplace-archetype series):  
 https://www.linkedin.com/posts/odedmesser_lately-i-keep-running-into-those-fun-little-share-7482058236548780032-6dxs/
 
 **Hebrew Example** (conversational storytelling + tech debt lesson, warmer tone):
@@ -318,7 +318,7 @@ Before finalizing:
 
 Use this checklist when generating or evaluating posts that should match Oded's voice.
 
-**Important**: When the post is in Hebrew, adjust expectations — the tone is generally more conversational, warm, and storytelling-driven than in English (see "Hebrew vs English Voice Differences" above). Do not force the sharp English executive tone into Hebrew posts. Likewise, for Tertiary / Playful Archetype Series posts, weight recognition value, dry humor, and series consistency over diagnostic depth — but still require a sharp closing insight and a tone that never turns bitter or heavy.
+**Important**: When the post is in Hebrew, adjust expectations — the tone is generally more conversational, warm, and storytelling-driven than in English (see "Hebrew vs English Voice Differences" above). Do not force the sharp English executive tone into Hebrew posts. Likewise, for Tertiary / Playful posts, weight recognition value and dry humor over diagnostic depth (and, for a series, consistency across installments) — but still require a sharp closing insight and a tone that never turns bitter or heavy.
 
 - [ ] Hook acknowledges the dominant positive view first, then reveals the disguised problem or hidden cost. Avoids generic/boilerplate LinkedIn openers.
 - [ ] Delivers at least one non-trivial, leverage-oriented insight for technically curious SWEs, staff engineers, or engineering leaders.
