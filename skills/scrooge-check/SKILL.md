@@ -1,6 +1,7 @@
 ---
 name: scrooge-check
-description: Pre-mortems a risky change — deploy, migration, force-push — by haunting it with three ghosts before you ship. Use before anything risky, especially on a Friday, or on "scrooge check", "pre-mortem".
+description: Pre-mortems a risky change — deploy, migration, force-push — by haunting it with three ghosts before you ship.
+disable-model-invocation: true
 compatibility: Requires git. Works in any repo.
 ---
 
