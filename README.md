@@ -43,6 +43,7 @@ Then invoke it in a new session — e.g. `/explain-to-manager` in Claude Code. S
 | [`expected-value-calculator/`](skills/expected-value-calculator/) | ✅ Yes | Finance/investing (not a SWE skill), but fully reusable: self-contained live data via `yfinance` + deterministic EV math. Imported from grok/ClawHub |
 | [`explain-to-manager/`](skills/explain-to-manager/) | ✅ Yes | Interview-driven manager briefs: status resets ("it's not ready / AI didn't 100x it"), spend proposals, and defenses of invisible work — trust-preserving, with hard-question prep |
 | [`check-prod-readiness/`](skills/check-prod-readiness/) | Partial — checklist is general; quality gates assume Python + nox | Pre-merge production-readiness gate: config hygiene, code checks, nox tests/lint, pre-commit |
+| [`scrooge-check/`](skills/scrooge-check/) | ✅ Yes | Pre-mortem for risky changes, styled as A Christmas Carol: Ghost of Past finds prior incidents via git history, Ghost of Present audits the diff for real risk smells, Ghost of Future writes a satirical incident report tracing back to them — verdict gates go/no-go |
 
 > Note: some skills are imported from the grok/ClawHub marketplace and retain their `_meta.json` / `skill-card.md` provenance files.
 
