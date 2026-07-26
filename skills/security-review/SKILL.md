@@ -340,8 +340,8 @@ After the report file has been written and confirmed, remove the scan reports di
 rm -rf ./.security_scan
 ```
 
-This removes the `.reports/` output written by `--save-reports`. The only artifact that remains is `security-review-YYYY-MM-DD.md` in the repo root.
+This removes the `.reports/` output written by `--save-reports`. The only artifact that remains is `security-review-YYYY-MM-DDTHH-MM-SS.md` in the repo root.
 
-Tell the user: "Report written to `security-review-YYYY-MM-DD.md`."
+Tell the user: "Report written to `security-review-YYYY-MM-DDTHH-MM-SS.md`."
 
 Do not approve if any verified secret was found, or if any Critical/High finding is unresolved without a documented risk-acceptance.

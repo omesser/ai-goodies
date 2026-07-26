@@ -1,6 +1,6 @@
 ---
 name: explain-to-manager
-description: "Interview an engineer about the gap between what their non-technical manager expects and the actual state of the work, then produce a business-friendly status update that preserves trust. Use when the user needs to tell a manager or stakeholder that something isn't ready, a technology isn't integrated yet, AI didn't deliver the expected speedup, a deadline will slip, or asks anything like \"how do I explain this to my boss / manager / management\". Also use for the opposite direction: justifying a recurring cost, tooling or infrastructure spend, or a proactive risk-closure proposal to management — or defending existing spend or invisible engineering work (maintenance, reliability, platform costs) under scrutiny."
+description: "Interview an engineer about the gap between what their non-technical manager expects and the actual state of the work, then produce a business-friendly status update that preserves trust. Use when the user needs to deliver bad news upward — work isn't ready, a deadline will slip, AI or a technology under-delivered — or asks anything like \"how do I explain this to my boss / manager / management\". Also use for justifying a cost, tooling spend, or risk-closure proposal to management, and for defending existing spend or invisible engineering work under scrutiny."
 compatibility: Pure conversational skill; no scripts, network, or repo access required.
 ---
 

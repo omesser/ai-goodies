@@ -8,17 +8,16 @@ compatibility: Cursor-compatible Agent Skill. Requires git.
 
 ## Purpose
 
-Pick exactly one reviewer for a branch or PR, plus one backup for fallback only, using two signals:
+The goal is roulette: a single clear reviewer selection (plus one fallback-only backup) instead of a reviewer group, from two signals:
 
 - Git evidence: who recently and historically worked on the changed files.
 - Ownership map: the desired ownership state in `docs/ownership-map.md`.
 
-The goal is roulette: make a single clear reviewer selection instead of assigning a reviewer group. Prefer the ownership
-map when git evidence is mixed, weak, or mostly reflects old ownership.
+Prefer the ownership map when git evidence is mixed, weak, or mostly reflects old ownership.
 
 ## Workflow
 
-1. Load `docs/ownership-map.md`.
+1. Load `docs/ownership-map.md`. If it doesn't exist, say so, rely on git evidence alone, and cap confidence at medium.
 
 2. Identify changed files.
 
