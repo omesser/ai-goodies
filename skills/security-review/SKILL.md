@@ -1,6 +1,7 @@
 ---
 name: security-review
-description: Run a live security and compliance scan on the current repo. Use when reviewing a PR, preparing to merge, or doing a security audit. Covers Python, Terraform, Kubernetes, JavaScript, Go, Shell, Helm, and secrets. Applies Company SDLC, Change Management, and Generative AI Use and Oversight compliance framework and writes a structured report.
+description: Run a live security and compliance scan on the current repo — Python, Terraform, Kubernetes, JavaScript, Go, Shell, Helm, and secrets — applying the Company SDLC, Change Management, and Generative AI Use and Oversight compliance framework, and write a structured report.
+disable-model-invocation: true
 allowed-tools: Bash(*), Write(*)
 ---
 
