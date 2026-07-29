@@ -10,13 +10,6 @@ compatibility: Cursor-compatible Agent Skill. Requires Node.js. No network acces
 
 Keep the generated `docs/*.md` index files in sync with the folder-local `index.json` files under `docs/`.
 
-## When to use
-
-- A numbered docs file was added, removed, or renamed.
-- An H2 heading changed inside a convention file.
-- A docs collection config changed in `docs/*/index.json`.
-- A reviewer flags that an index is stale.
-
 ## Inputs
 
 None. The script discovers all folders under `docs/` that contain an `index.json` file.

@@ -39,7 +39,7 @@ Default behavior:
 - Prefer explicit refs like `versions/web-app/<version>`.
 - Verify end ref exists.
 - If start version is not provided, infer it semantically:
-  - Find refs/tags in the same release stream as the end ref (for example `versions/web-app/*`).
+  - Enumerate refs/tags in the same release stream as the end ref (for example `git tag -l "versions/web-app/*"`).
   - Parse semantic versions and pick the nearest lower version than the end version.
   - Use that as the start ref.
   - If no lower version exists, fail with a clear message asking for explicit start version.
@@ -123,38 +123,12 @@ Default behavior:
 - Mention uncertainty when classification is ambiguous.
 - Keep secrets out of outputs (never print tokens).
 - Prefer concise, outcome-focused wording.
-- Keep link prefixes short and consistent for easy bulk removal.
-- Ensure meaningful PR-only items are represented; missing Jira is not a reason to omit a change.
-
-## Source Notes (Jira)
-
-- Preferred `.agents/skills/release-notes/release-notes-secrets.env` shape:
-  - `ATLASSIAN_BASE_URL=https://company.atlassian.net`
-  - `EMAIL=...`
-  - `JIRA_TOKEN=...` (optional; enables Jira enrichment)
-  - `GITHUB_TOKEN=...` (optional; enables GitHub PR enrichment)
-- Jira auth uses Basic auth with `EMAIL:JIRA_TOKEN`.
-- `401` on Jira auth with `-u`:
-  - token/account mismatch, expired token, or invalid token.
-- `404` for specific issue:
-  - missing key, wrong project key, or permission restriction.
-- Bearer token failing on site endpoints:
-  - use Cloud ID endpoint with Basic auth for this flow.
 
 ## References
 
 - Workflow examples: [references/examples.md](references/examples.md)
+- Jira auth troubleshooting: [references/jira-troubleshooting.md](references/jira-troubleshooting.md)
 - Scripts:
   - `scripts/collect_commit_context.py`
   - `scripts/sources/fetch_jira_issues.py`
   - `scripts/sources/fetch_github_prs.py`
-
-## Auto-previous version lookup
-
-When user provides only `toVersion`, infer `fromVersion` from the same stream:
-
-- Normalize `toVersion` as `versions/web-app/<toVersion>` when that ref exists.
-- Enumerate candidates from `git tag -l "versions/web-app/*"` (or matching ref namespace).
-- Keep only semantic versions lower than `<toVersion>`.
-- Select the closest lower version as `<fromVersion>`.
-- Build range as `<fromRef>..<toRef>`.
