@@ -8,7 +8,6 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 |-----------|----------|
 | [`templates/`](templates/) | AGENTS.md and CLAUDE.md starters for different project types |
 | [`skills/`](skills/) | Claude Code slash-command skills (`.claude/skills/` or `.agents/skills/`) |
-| [`settings/`](settings/) | `.claude/settings.json` examples (global + local) |
 | [`guides/`](guides/) | How-to prose: AGENTS.md, skills, plugins |
 
 ## Installing a skill
@@ -45,6 +44,7 @@ Then invoke it in a new session — e.g. `/explain-to-manager` in Claude Code. S
 | [`check-prod-readiness/`](skills/check-prod-readiness/) | Partial — checklist is general; quality gates assume Python + nox | Pre-merge production-readiness gate: config hygiene, code checks, nox tests/lint, pre-commit |
 | [`scrooge-check/`](skills/scrooge-check/) | ✅ Yes | Pre-mortem for risky changes, styled as A Christmas Carol: Ghost of Past finds prior incidents via git history, Ghost of Present audits the diff for real risk smells, Ghost of Future writes a satirical incident report tracing back to them — verdict gates go/no-go |
 | [`daily-news-briefing/`](skills/daily-news-briefing/) | ✅ Yes — swap the regions/instruments for your own | User-invoked geopolitics + markets briefing built for scheduled runs: commentary-first search, every item carries its "so what", every market move tagged priced-in or not, trade ideas dropped unless a mispricing is named |
+| [`developer-voice/`](skills/developer-voice/) | ✅ Yes — user-invoked only | Register reset distilled from [Google's developer documentation style guide](https://developers.google.com/style) + [eng-practices](https://google.github.io/eng-practices/): write like a knowledgeable friend who knows the reader is in a hurry. Substitutions table (`simply` / `please note` / sycophancy / ableist idioms), one-idea-per-sentence rule, and per-surface shapes for chat, commits, PRs, code comments, errors, and review feedback |
 
 > Note: some skills are imported from the grok/ClawHub marketplace and retain their `_meta.json` / `skill-card.md` provenance files.
 
@@ -109,7 +109,7 @@ Personally-maintained skill sources — one person's own workflow, published. Hi
 
 Near-misses worth watching: Steve Yegge's [beads/gastown](https://github.com/steveyegge/beads) agent-workflow stack (~25k, more tool than skill source), Hamel Husain's [evals-skills](https://github.com/hamelsmu/evals-skills) (evals authority, small but sharp), and Armin Ronacher's [agent-stuff](https://github.com/mitsuhiko/agent-stuff).
 
-## Installed plugins (global settings)
+## Installed plugins
 
 | Plugin | Repo | What it does |
 |--------|------|--------------|
@@ -122,4 +122,4 @@ Near-misses worth watching: Steve Yegge's [beads/gastown](https://github.com/ste
 1. Copy `templates/AGENTS-general.md` → `AGENTS.md`, edit org name and stack.
 2. Copy `templates/CLAUDE-*.md` that fits your stack → `CLAUDE.md`, strip project-specific sections.
 3. Install the skills you want — see [Installing a skill](#installing-a-skill).
-4. Copy `settings/settings.local.example.json` → `.claude/settings.local.json`, tune permissions. For global plugins/hooks, see `settings/settings.global.example.json`.
+4. Tune `.claude/settings.local.json` permissions for the tools that repo actually needs. Run `/fewer-permission-prompts` to generate an allowlist from your own transcripts rather than copying someone else's.
