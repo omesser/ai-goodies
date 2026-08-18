@@ -7,6 +7,19 @@ The skill is `disable-model-invocation: true`, so the agent never fires it on it
 deliberate: an agent that switches its own register mid-task is unpredictable in exactly the
 way a voice skill is supposed to prevent. You decide when the register changes.
 
+## Install first
+
+Every mode below needs the skill folder on disk. Mode 2 in particular points a hook at
+`SKILL.md` by path, so install before you write the hook.
+
+```bash
+npx skills add omesser/ai-goodies --skill developer-voice
+```
+
+Or copy `skills/developer-voice/` into `~/.claude/skills/` (user-level) or
+`.claude/skills/` (project-level). See [Installing a skill](../../README.md#installing-a-skill)
+for the other agents. Note which location you chose — the hook paths in Mode 2 depend on it.
+
 ## Mode 1 — per session, by hand
 
 ```
