@@ -7,8 +7,6 @@ The skill is `disable-model-invocation: true`, so the agent never fires it on it
 deliberate: an agent that switches its own register mid-task is unpredictable in exactly the
 way a voice skill is supposed to prevent. You decide when the register changes.
 
-Pick an activation mode based on how long you want it to hold.
-
 ## Mode 1 — per session, by hand
 
 ```
@@ -20,29 +18,43 @@ Good enough for a focused session of writing-heavy work.
 
 Two limits worth knowing:
 
-- **Drift.** Instructions injected once lose salience over a long session. The `## Persistence`
-  stanza in `SKILL.md` pushes back on this, but it doesn't make the rules load-bearing the way
-  a system prompt is.
-- **Compaction.** When the context window fills, the turn holding these rules can be summarized
-  down or dropped. Re-invoke `/developer-voice` after a compaction if the voice slips.
+- **Drift.** Instructions injected once lose salience over a long session. They aren't
+  load-bearing the way a system prompt is.
+- **Compaction.** When the context window fills, the turn holding these rules can be
+  summarized down or dropped. Re-invoke `/developer-voice` if the voice slips.
 
-## Mode 2 — always on, via a SessionStart hook
+Mode 2 fixes both.
 
-The reliable way to make it "always on". A `SessionStart` hook prints the rules on every new
-session, so they arrive before your first prompt and you never have to remember them.
+## Mode 2 — always on, via hooks (recommended)
 
-Add to `~/.claude/settings.json` (see [`settings/settings.global.example.json`](../../settings/settings.global.example.json)
-for the surrounding shape):
+A `SessionStart` hook prints the rules on every new session, so they arrive before your first
+prompt. Its stdout is injected into the model's context, which is what makes it an activation
+lever rather than just a terminal message.
+
+Add to the project's `.claude/settings.json`, or `~/.claude/settings.json` for every repo:
 
 ```json
 {
   "hooks": {
     "SessionStart": [
       {
+        "matcher": "startup|resume|clear|compact",
         "hooks": [
           {
             "type": "command",
-            "command": "cat ~/.claude/skills/developer-voice/SKILL.md"
+            "command": "cat \"$CLAUDE_PROJECT_DIR/.claude/skills/developer-voice/SKILL.md\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat \"$CLAUDE_PROJECT_DIR/.claude/skills/developer-voice/SKILL.md\"",
+            "timeout": 5
           }
         ]
       }
@@ -51,19 +63,45 @@ for the surrounding shape):
 }
 ```
 
-Zero duplication — the hook reads the same `SKILL.md`. Costs its tokens on every session,
-including sessions with no prose in them, so scope it to the project's `.claude/settings.json`
-rather than the global file if only some repos want it.
+For a user-level install, swap the path for `~/.claude/skills/developer-voice/SKILL.md`.
 
-For a project-scoped copy, point the command at `.claude/skills/developer-voice/SKILL.md`.
+**The matcher carries the weight.** All four values matter for a voice:
 
-## Mode 3 — always on, via project instructions
+| Matcher | Fires when | Why it's in the list |
+|---|---|---|
+| `startup` | Fresh `claude` invocation | The base case |
+| `resume` | `--resume` / `--continue` | Without it, resumed sessions lose the voice |
+| `clear` | `/clear` | `/clear` wipes context, rules included |
+| `compact` | After compaction | Re-injects the rules the moment compaction drops them, so Mode 1's drift problem self-heals |
 
-Copy the rules into `AGENTS.md` or `CLAUDE.md`, which load every session at the top of context
-and take precedence over default behavior. The strongest persistence of the three.
+Omitting `matcher` (or `""`) fires on all events, which works but hides the intent. Name them.
 
-The cost is a second copy of the rules to maintain. Prefer Mode 2 unless you want the voice to
-apply to every agent that reads the repo's instruction files, not just Claude Code.
+`SubagentStart` matters because a subagent writing your PR description has otherwise never
+heard of the voice.
+
+Zero duplication — both hooks read the same `SKILL.md`.
+
+Two costs to weigh:
+
+- **Tokens on every session.** `SKILL.md` is roughly 1.2k tokens, spent whether or not that
+  session involves prose. That's the argument for the project-scoped `.claude/settings.json`
+  over the global file.
+- **Hook config is snapshotted at startup.** Editing `settings.json` mid-session changes
+  nothing until you restart. Check what's actually loaded with `/hooks`.
+
+Skip `UserPromptSubmit`. It re-injects on every turn, which is the strongest anti-drift
+option and the wrong trade here — paying 1.2k tokens per turn to enforce prose style, when
+`SessionStart` with `compact` already covers the realistic failure modes.
+
+## Mode 3 — project instruction files (not recommended)
+
+Copying the rules into `AGENTS.md` or `CLAUDE.md` gives the strongest persistence, since those
+load every session at the top of context and take precedence over default behavior.
+
+**It costs you a second copy of the rules to maintain**, which is why it isn't the recommended
+path. Two copies drift, and the one in `AGENTS.md` is the one that will go stale. Reach for it
+only when you need agents other than Claude Code to pick up the voice from the repo's
+instruction files, and accept the maintenance burden when you do.
 
 ## Not the mechanism
 

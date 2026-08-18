@@ -8,7 +8,6 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 |-----------|----------|
 | [`templates/`](templates/) | AGENTS.md and CLAUDE.md starters for different project types |
 | [`skills/`](skills/) | Claude Code slash-command skills (`.claude/skills/` or `.agents/skills/`) |
-| [`settings/`](settings/) | `.claude/settings.json` examples (global + local) |
 | [`guides/`](guides/) | How-to prose: AGENTS.md, skills, plugins |
 
 ## Installing a skill
@@ -110,7 +109,7 @@ Personally-maintained skill sources — one person's own workflow, published. Hi
 
 Near-misses worth watching: Steve Yegge's [beads/gastown](https://github.com/steveyegge/beads) agent-workflow stack (~25k, more tool than skill source), Hamel Husain's [evals-skills](https://github.com/hamelsmu/evals-skills) (evals authority, small but sharp), and Armin Ronacher's [agent-stuff](https://github.com/mitsuhiko/agent-stuff).
 
-## Installed plugins (global settings)
+## Installed plugins
 
 | Plugin | Repo | What it does |
 |--------|------|--------------|
@@ -123,4 +122,4 @@ Near-misses worth watching: Steve Yegge's [beads/gastown](https://github.com/ste
 1. Copy `templates/AGENTS-general.md` → `AGENTS.md`, edit org name and stack.
 2. Copy `templates/CLAUDE-*.md` that fits your stack → `CLAUDE.md`, strip project-specific sections.
 3. Install the skills you want — see [Installing a skill](#installing-a-skill).
-4. Copy `settings/settings.local.example.json` → `.claude/settings.local.json`, tune permissions. For global plugins/hooks, see `settings/settings.global.example.json`.
+4. Tune `.claude/settings.local.json` permissions for the tools that repo actually needs. Run `/fewer-permission-prompts` to generate an allowlist from your own transcripts rather than copying someone else's.
