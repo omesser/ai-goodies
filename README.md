@@ -67,7 +67,7 @@ Then invoke it in a new session — e.g. `/explain-to-manager` in Claude Code. S
 | Guide | Covers |
 |-------|--------|
 | [`agents-md-guide.md`](guides/agents-md-guide.md) | Writing a good `AGENTS.md` / `CLAUDE.md`; CLAUDE.md vs AGENTS.md |
-| [`skill-authoring.md`](guides/skill-authoring.md) | Anatomy of a Claude Code skill and where skills live |
+| [`skill-authoring.md`](guides/skill-authoring.md) | Anatomy of a Claude Code skill, where skills live, and model-invoked vs user-invoked |
 | [`plugins.md`](guides/plugins.md) | Installed plugins and how plugin marketplaces work |
 
 ## OSS skills worth installing
