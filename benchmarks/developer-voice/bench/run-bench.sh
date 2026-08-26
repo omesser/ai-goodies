@@ -17,14 +17,19 @@ throttle() { while [ "$(jobs -rp | wc -l)" -ge "$MAXJOBS" ]; do wait -n; done; }
 for rep in $(seq 1 "$REPS"); do
   for p in prompts/p*.txt; do
     n="$(basename "$p" .txt)"
-    throttle; run_session 0 "$(cat "$p")" >"out/off_${n}_r${rep}.txt" &
-    throttle; run_session 1 "$(cat "$p")" >"out/on_${n}_r${rep}.txt" &
+    throttle
+    run_session 0 "$(cat "$p")" > "out/off_${n}_r${rep}.txt" &
+    throttle
+    run_session 1 "$(cat "$p")" > "out/on_${n}_r${rep}.txt" &
   done
   wait
   echo "[rep $rep complete]"
 done
 
 empty=0
-for f in out/*.txt; do [ -s "$f" ] || { echo "EMPTY: $f"; empty=1; }; done
+for f in out/*.txt; do [ -s "$f" ] || {
+  echo "EMPTY: $f"
+  empty=1
+}; done
 [ "$empty" -eq 0 ] && echo "all $(find out -name '*.txt' | wc -l | tr -d ' ') runs non-empty"
 exit "$empty"

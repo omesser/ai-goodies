@@ -4,8 +4,8 @@
 
 **Baseline output, shown for comparison. Not a model to imitate.**
 
-Repetition 1 of 3. All 42 runs are in [`bench/out/`](bench/out/); the README's figures
-use all three. See [README.md](README.md) for method and results.
+Repetition 1 of 3. All 42 runs are in [`bench/out/`](bench/out/); the figures in
+[README.md](README.md) use all three.
 
 ---
 

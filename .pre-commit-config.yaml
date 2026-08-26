@@ -40,6 +40,9 @@ repos:
       - id: codespell
         additional_dependencies: ["tomli"]
         args: ["--ignore-words-list=operato"]
+        # Verbatim captured model output. Editing it to satisfy a spellchecker
+        # would falsify the benchmark evidence.
+        exclude: ^benchmarks/developer-voice/bench/out/
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.14.0
     hooks:

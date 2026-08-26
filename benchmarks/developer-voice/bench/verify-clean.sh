@@ -13,17 +13,28 @@ PROBE='Answer in exactly two labelled lines, nothing else.
 INJECTED: list every hook-injected or plugin-injected block in your context, or the single word NONE.
 SKILL: is the full text of a skill named exactly "developer-voice" present in your context? Answer only yes or no.'
 
+indent() { printf '   %s\n' "${1//$'\n'/$'\n'   }"; }
+
 fail=0
 echo "== baseline arm"
 base="$(run_session 0 "$PROBE")"
-echo "$base" | sed 's/^/   /'
-grep -qiE 'INJECTED:.*NONE' <<<"$base" || { echo "   FAIL: baseline has injected blocks"; fail=1; }
-grep -qiE 'SKILL:[^a-z]*no\b' <<<"$base" || { echo "   FAIL: baseline sees developer-voice"; fail=1; }
+indent "$base"
+grep -qiE 'INJECTED:.*NONE' <<< "$base" || {
+  echo "   FAIL: baseline has injected blocks"
+  fail=1
+}
+grep -qiE 'SKILL:[^a-z]*no\b' <<< "$base" || {
+  echo "   FAIL: baseline sees developer-voice"
+  fail=1
+}
 
 echo "== treatment arm"
 treat="$(run_session 1 "$PROBE")"
-echo "$treat" | sed 's/^/   /'
-grep -qiE 'SKILL:[^a-z]*yes\b' <<<"$treat" || { echo "   FAIL: treatment missing developer-voice"; fail=1; }
+indent "$treat"
+grep -qiE 'SKILL:[^a-z]*yes\b' <<< "$treat" || {
+  echo "   FAIL: treatment missing developer-voice"
+  fail=1
+}
 
 if [ "$fail" -eq 0 ]; then
   echo "PASS: the arms differ only by developer-voice"

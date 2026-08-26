@@ -9,6 +9,7 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 | [`templates/`](templates/) | AGENTS.md and CLAUDE.md starters for different project types |
 | [`skills/`](skills/) | Claude Code slash-command skills (`.claude/skills/` or `.agents/skills/`) |
 | [`guides/`](guides/) | How-to prose: AGENTS.md, skills, plugins |
+| [`benchmarks/`](benchmarks/) | A/B harnesses and results for skills, kept out of the skill folders so they aren't installed |
 
 ## Installing a skill
 
@@ -44,7 +45,7 @@ Then invoke it in a new session — e.g. `/explain-to-manager` in Claude Code. S
 | [`check-prod-readiness/`](skills/check-prod-readiness/) | Partial — checklist is general; quality gates assume Python + nox | Pre-merge production-readiness gate: config hygiene, code checks, nox tests/lint, pre-commit |
 | [`scrooge-check/`](skills/scrooge-check/) | ✅ Yes | Pre-mortem for risky changes, styled as A Christmas Carol: Ghost of Past finds prior incidents via git history, Ghost of Present audits the diff for real risk smells, Ghost of Future writes a satirical incident report tracing back to them — verdict gates go/no-go |
 | [`daily-news-briefing/`](skills/daily-news-briefing/) | ✅ Yes — swap the regions/instruments for your own | User-invoked geopolitics + markets briefing built for scheduled runs: commentary-first search, every item carries its "so what", every market move tagged priced-in or not, trade ideas dropped unless a mispricing is named |
-| [`developer-voice/`](skills/developer-voice/) | ✅ Yes — user-invoked only | Register reset distilled from [Google's developer documentation style guide](https://developers.google.com/style) + [eng-practices](https://google.github.io/eng-practices/): write like a knowledgeable friend who knows the reader is in a hurry. Substitutions table (`simply` / `please note` / sycophancy / ableist idioms), one-idea-per-sentence rule, and per-surface shapes for chat, commits, PRs, code comments, errors, and review feedback. Ships [`examples/`](skills/developer-voice/examples/) — the same prompts answered with the skill off and on |
+| [`developer-voice/`](skills/developer-voice/) | ✅ Yes — user-invoked only | Register reset distilled from [Google's developer documentation style guide](https://developers.google.com/style) + [eng-practices](https://google.github.io/eng-practices/): write like a knowledgeable friend who knows the reader is in a hurry. Substitutions table (`simply` / `please note` / sycophancy / ableist idioms), one-idea-per-sentence rule, and per-surface shapes for chat, commits, PRs, code comments, errors, and review feedback. Measured in [`benchmarks/developer-voice/`](benchmarks/developer-voice/) |
 
 > Note: some skills are imported from the grok/ClawHub marketplace and retain their `_meta.json` / `skill-card.md` provenance files.
 

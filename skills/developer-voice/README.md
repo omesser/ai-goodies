@@ -7,9 +7,10 @@ The skill is `disable-model-invocation: true`, so the agent never fires it on it
 deliberate: an agent that switches its own register mid-task is unpredictable in exactly the
 way a voice skill is supposed to prevent. You decide when the register changes.
 
-To see what it actually does to output before installing it, read
-[`examples/`](examples/) — the same two prompts answered with the skill off and on, plus the
-method and the measured differences.
+To see what it does to output before installing, read the
+[benchmark](../../benchmarks/developer-voice/) — seven prompts answered with the skill off and
+on, with the harness that produced them. It lives outside the skill so it isn't installed
+alongside it.
 
 ## Install first
 

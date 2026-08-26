@@ -52,10 +52,13 @@ run_session() {
   workdir="$(mktemp -d)"
   (
     cd "$workdir"
-    DEV_VOICE_OFF=1 claude --settings "$(build_settings "$with_skill")" -p "$prompt" </dev/null
+    DEV_VOICE_OFF=1 claude --settings "$(build_settings "$with_skill")" -p "$prompt" < /dev/null
   )
   # claude writes session state into the cwd, so rmdir is not enough.
   case "$workdir" in /*/*) rm -rf "$workdir" ;; esac
 }
 
-[ -f "$SKILL_MD" ] || { echo "SKILL.md not found at $SKILL_MD" >&2; exit 1; }
+[ -f "$SKILL_MD" ] || {
+  echo "SKILL.md not found at $SKILL_MD" >&2
+  exit 1
+}
