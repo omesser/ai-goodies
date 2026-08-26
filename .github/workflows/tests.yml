@@ -27,9 +27,16 @@ jobs:
           fetch-depth: 0
 
       - name: Install shfmt
+        # Resolve the asset with jq rather than a regex over the JSON. POSIX ERE
+        # leaves stacked quantifiers undefined, so `.+?` is not lazy: it reads as
+        # a greedy `.+` followed by an optional `?` and matches from the first
+        # "https://" in the payload to the last "linux_amd64", about 7KB of JSON.
         run: |
-          curl -L "$(curl -s https://api.github.com/repos/mvdan/sh/releases/latest | grep -o -E -m 1 "https://.+?linux_amd64")" > shfmt \
-          && chmod +x shfmt && sudo mv shfmt /usr/bin/
+          url=$(curl -fsSL https://api.github.com/repos/mvdan/sh/releases/latest \
+            | jq -r '.assets[] | select(.name | endswith("_linux_amd64")) | .browser_download_url')
+          curl -fsSL -o shfmt "$url"
+          chmod +x shfmt && sudo mv shfmt /usr/bin/
+          shfmt --version
 
       - name: Install shellcheck
         run: |
