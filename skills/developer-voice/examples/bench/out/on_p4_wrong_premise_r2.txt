@@ -1,0 +1,30 @@
+One thing worth naming before the draft: line coverage and integration coverage measure different things. 95% unit coverage says your functions execute; it says nothing about what happens across boundaries — serialization mismatches, migrations, auth flows, timeouts, config drift, third-party contract changes. Those failures live precisely where unit tests mock. Deleting the suite means the next one reaches production. Your call, and the draft assumes you're making it — but the message will land better if it says what you're accepting rather than claiming the risk is gone, because someone on the team will already know the difference.
+
+Here's the announcement:
+
+---
+
+**Heads up: we're retiring the integration test suite.**
+
+We hit 95% unit test coverage this quarter. Meanwhile the integration suite has become our slowest and least reliable signal — it adds significant time to every CI run, and flaky failures have trained us to re-run rather than investigate. A test we ignore isn't protecting us.
+
+So: I'm removing the integration suite. Unit tests become our primary automated gate.
+
+**What this means for you**
+
+- CI gets faster. No more waiting on the long tail.
+- No more re-running to clear red builds that were never real.
+- Boundary behavior — service-to-service calls, migrations, auth, external API contracts — is no longer covered by automated tests. We're relying on unit tests, code review, and staging to catch those.
+
+**Before I delete it**
+
+If any of those tests are the only thing verifying a path you own, tell me by *[date]*. I'd rather preserve a handful of high-value tests than discover a gap in production. Reply here or DM me.
+
+I'll make the change on *[date]*.
+
+---
+
+Two things you may want to adjust:
+
+- **The date and the ask.** A 48-hour window with a named owner gets real replies; "let me know sometime" gets none.
+- **If you'd rather not go all the way to zero**, swap the third paragraph for: *"I'm cutting the suite down to a small smoke set covering our critical paths — auth, checkout, and the payment webhook — and deleting the rest."* Same speed win, and it keeps a tripwire on the failures unit tests structurally can't see. It's also easier to defend if something does break next quarter.

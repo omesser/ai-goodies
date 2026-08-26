@@ -1,0 +1,55 @@
+Here are the comments I'd leave.
+
+## Blocking
+
+**1. SQL injection on the `INSERT` (line 6)**
+
+`"... VALUES ('%s', %s)" % (p['user'], p['amount'])` interpolates user-controlled data straight into SQL. A user named `'); DROP TABLE payments; --` ends the discussion. Pass the values as query parameters instead:
+
+```python
+db.execute(
+    "INSERT INTO payments (user, amount) VALUES (?, ?)",
+    (p["user"], p["amount"]),
+)
+```
+
+Use whatever placeholder style your DB-API driver wants (`?`, `%s`, `:name`). The point is that the driver binds the values rather than the string formatter.
+
+**2. Retrying a non-idempotent `INSERT` can double-charge**
+
+If the insert commits and the connection drops before the ack arrives, the exception fires and the retry inserts a second row for the same payment. That's a real duplicate charge, not a hypothetical. Two ways out, pick one:
+
+- Give each payment an idempotency key with a unique constraint, and treat a uniqueness violation on retry as success.
+- Only retry on errors you know left no write behind (connect failures, pool timeouts), and let everything else propagate.
+
+**3. Failures are swallowed, and the caller can't detect them**
+
+When all attempts fail, the loop prints and moves on. `results` ends up shorter than `payments` with no indication of which ones dropped, so a caller that gets 9 results for 10 payments has no way to find the missing one. Money silently disappearing is the worst failure mode here. Consider returning a per-payment outcome (or raising after collecting failures) so the caller decides what to do.
+
+## Should fix
+
+**4. `except Exception` retries errors that will never succeed**
+
+A `KeyError` from a malformed `p`, or a constraint violation, gets three attempts and 6 seconds of sleep before being discarded. Catch the driver's transient error types instead, and pull the dict access out of the `try` so bad input fails fast.
+
+**5. The last sleep is dead time**
+
+On the final attempt the code sleeps `2 ** (retries - 1)` seconds and then exits the loop anyway. Sleep between attempts, not after the last one.
+
+**6. `print` instead of logging**
+
+The error goes to stdout with no payment identifier, no timestamp, and no traceback. `logger.exception("payment insert failed", extra={"user": p["user"]})` gives on-call something to work with.
+
+## Worth considering
+
+**7. `time` isn't imported in this file** — assuming it's at module scope, but I didn't see it. Worth a check.
+
+**8. Blocking `time.sleep` with no jitter.** If this runs in a request path it holds the thread. If many workers retry against the same struggling DB, synchronized backoff makes the pile-up worse — add jitter.
+
+**9. No transaction boundary.** Each `execute` is its own implicit transaction with no visible commit. Confirm that matches your driver's autocommit setting, and that a partial batch is acceptable.
+
+**10. One round trip per payment.** For large batches, `executemany` or a multi-row insert would cut this down a lot. Not urgent unless batches are big.
+
+## What works well
+
+The retry structure itself is the right shape — bounded attempts with exponential backoff, breaking on success. The fixes above are mostly about *what* gets retried and how failures surface, not about the control flow.

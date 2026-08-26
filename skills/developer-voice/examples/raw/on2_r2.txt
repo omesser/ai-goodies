@@ -1,7 +1,0 @@
-**HTTP client: automatic retries**
-
-The HTTP client now retries failed requests on its own. Transient failures — connection resets, timeouts, and 5xx responses — no longer surface as errors on the first attempt.
-
-Retries use exponential backoff with jitter, so a struggling upstream doesn't get hit by a synchronized wave of clients. Only idempotent requests retry by default.
-
-No code changes needed. To tune the behavior, set the retry count and backoff limits in your client config.

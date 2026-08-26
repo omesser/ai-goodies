@@ -1,0 +1,18 @@
+Here are the opening two paragraphs. I've used `[Product]` as a placeholder for the cache layer's name, and kept every claim to the one number you gave me — no invented throughput, cost, or adoption figures to fill in later.
+
+---
+
+**Introducing [Product]: reads that finish before you notice them**
+
+Today we're shipping [Product], a distributed caching layer that sits between your services and your primary datastore. The headline: p99 read latency drops from 180ms to 12ms — a 15x reduction on the requests that used to hurt most. Not the median, which was never the problem. The tail. The one read in a hundred that stalled a page, tripped a timeout, or turned a clean dashboard into a support ticket.
+
+Tail latency is where distributed systems quietly lose their reputation. A p50 of 8ms looks great in a status meeting, but users don't experience averages — they experience the slowest thing that has to happen before the screen renders. When a single page fans out to a dozen backend reads, a 180ms p99 stops being an edge case and becomes the common case: the more reads you make, the likelier you are to hit one. [Product] was built to flatten that curve, and the numbers below show what that looks like in production.
+
+---
+
+Two things worth deciding before this goes out:
+
+- **The 15x claim needs a footnote** — readers will ask what workload, what dataset size, what hardware, and whether 180ms was measured against a cold or warm origin. One line of methodology buys a lot of credibility.
+- **The last sentence promises numbers below.** If the post doesn't have a chart or table, cut that clause.
+
+Happy to write a variant with a different tone — more technical, more executive-facing, or shorter — if you tell me where it's publishing.

@@ -1,0 +1,13 @@
+I can't tell you it's clean without seeing it — 800→120 is equally consistent with "deleted a pile of ceremony" and "deleted behavior that mattered." Point me at the diff and I'll give you a real answer.
+
+What I'd check first, roughly in order of how much they'd worry me in auth code:
+
+**Where did the per-provider behavior go?** Strategy objects in an auth module usually hold genuine differences: token refresh semantics, claim mapping, clock-skew tolerance, provider-specific error handling. If those collapsed into a dict, either they were never real (the old code was eight classes doing the same thing), or they're now inside the dict values, or they're gone. Only the first is a win. The second is the same code with a different shape.
+
+**Did the tests change?** This is the strongest signal you have. If the existing suite passes untouched, you refactored. If you had to rewrite tests, you changed behavior, and the line count is measuring the wrong thing.
+
+**What happens on a cache miss?** `providers[name]` with an attacker-influenced `name`. Does an unknown provider raise, or does it hit a `.get(name, default)` that falls through to something permissive? Missing-key handling is where dict-lookup auth tends to go wrong.
+
+**Who registers providers now?** If anything outside the module used to plug in a strategy — a plugin, a test double, a customer-specific build — a module-level dict moves that to "edit core auth and redeploy." Might be fine if you're the only consumer. Worth knowing that you made the call.
+
+One framing thing: an afternoon and a 6.6x line reduction are inputs, not evidence. The evidence is the test suite and the diff. Happy to read either.

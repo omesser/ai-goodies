@@ -1,0 +1,44 @@
+No existing file matched, so here's the function as pasted:
+
+```python
+def load_config(path, *, strict=True):
+    """Load and validate a version 2 TOML config file.
+
+    Args:
+        path: Path to the TOML file, as anything ``Path`` accepts.
+        strict: When True, the config must declare a ``version`` key.
+            When False, a missing ``version`` is reported by the version
+            check instead (see Note).
+
+    Returns:
+        The parsed config as a dict.
+
+    Raises:
+        OSError: If the file cannot be read.
+        tomllib.TOMLDecodeError: If the file is not valid TOML.
+        ConfigError: If the config declares no ``version`` under strict
+            mode, or declares a version other than 2.
+
+    Note:
+        ``strict=False`` does not make a version-less config loadable; it
+        only changes which error is raised, since the version check treats
+        a missing key as ``None``.
+    """
+    data = tomllib.loads(Path(path).read_text())
+    if strict and "version" not in data:
+        raise ConfigError(
+            f"{path}: missing required key 'version' "
+            f"(expected version 2; pass strict=False to skip this check)"
+        )
+    if data.get("version") != 2:
+        raise ConfigError(
+            f"{path}: unsupported config version {data.get('version')!r} "
+            f"(expected 2)"
+        )
+    return data
+```
+
+Two things I made choices about:
+
+- **Both messages lead with `path`.** Config errors usually surface far from the call site, and "missing required key 'version'" alone doesn't tell you which of several config files is at fault.
+- **`strict` doesn't do what its name suggests.** With `strict=False` and no `version` key, `data.get("version")` returns `None`, which fails the second check anyway — so the flag only swaps a precise error for a vaguer one (`unsupported config version None`). I documented the actual behavior rather than the apparent intent. If the intent was for `strict=False` to *permit* a version-less config, the second check needs to be `if "version" in data and data["version"] != 2:` — say the word and I'll make that change.

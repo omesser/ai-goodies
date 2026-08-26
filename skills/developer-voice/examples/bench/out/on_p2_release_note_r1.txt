@@ -1,0 +1,38 @@
+The working directory is empty, so I wrote this against generic defaults. Swap in your real config names, version, and defaults.
+
+---
+
+## Automatic retries in the HTTP client
+
+**v1.4.0**
+
+The HTTP client now retries failed requests on its own. Transient failures — connection resets, timeouts, `429`, and `5xx` responses — no longer surface as errors on the first attempt.
+
+**What you get by default**
+
+- Up to 3 attempts per request.
+- Exponential backoff with jitter, starting at 200 ms.
+- `Retry-After` is honored when the server sends it.
+- Only idempotent methods (`GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS`) retry automatically.
+
+**Tuning it**
+
+```js
+const client = new HttpClient({
+  retry: {
+    maxAttempts: 5,
+    initialDelayMs: 500,
+    retryOn: [429, 502, 503, 504],
+  },
+});
+```
+
+Set `retry: false` to turn it off.
+
+**Upgrading**
+
+No code changes required. Requests that previously failed fast now take longer before returning an error, so check any timeouts you set around client calls. If your `POST` handlers aren't idempotent, leave the method defaults alone.
+
+---
+
+Two things worth confirming before you publish: whether `POST` retries are opt-in in your implementation, and whether the default attempt count matches what shipped.

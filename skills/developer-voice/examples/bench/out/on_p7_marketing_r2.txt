@@ -1,0 +1,11 @@
+Placeholder name in brackets — swap in the real one.
+
+---
+
+Today we're shipping [CacheName], a distributed caching layer that sits between your services and your primary datastore. In production, it cut p99 read latency from 180ms to 12ms. That is a 15x improvement on the slowest requests, the ones your users actually notice. Median latency improved too, but the p99 number is the one we optimized for.
+
+The old path was straightforward and slow. Every read went to the primary datastore, so tail latency tracked whatever that datastore was doing under load: lock contention, cold pages, a noisy neighbor on the same shard. [CacheName] keeps hot keys in memory across a cluster of nodes and routes each read to the node that owns the key. Reads that hit the cache never touch the datastore. Reads that miss fall through, populate the cache, and stay fast for everyone who asks next.
+
+---
+
+Two things to check before publishing: whether 180ms → 12ms came from a production workload or a benchmark, and whether the median improvement is worth a number of its own.

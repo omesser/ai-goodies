@@ -1,0 +1,1 @@
+I refactored our auth module from 800 lines down to 120 by ripping out the strategy pattern and replacing it with a single dict lookup keyed on provider name. Took me an afternoon. Pretty clean solution, right? What do you think?

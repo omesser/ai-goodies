@@ -1,0 +1,40 @@
+No — blanket retries on every outbound call is one of the more reliable ways to turn a partial outage into a full one. The short version: retry is a per-call decision, and it hinges on three things.
+
+**1. Is the operation idempotent?**
+
+Retrying a `GET` or a lookup is free. Retrying `POST /charges` or `POST /send-email` without an idempotency key means double-charging or double-sending. The dangerous case isn't the connection refused — it's the timeout, where the request *did* land and you never saw the response.
+
+So: retry reads freely; retry writes only when the endpoint accepts an idempotency key (or you supply a dedup key you control), and pass a stable key per logical operation, not per attempt.
+
+**2. Is the error actually retryable?**
+
+Retrying a `400`, `401`, `403`, `404`, or `422` is pure waste — the answer won't change. Retryable set is roughly: connection errors, timeouts, `429`, `502/503/504`. `500` is a judgment call; often it isn't transient. And honor `Retry-After` when it's there.
+
+**3. Does the retry fit inside your own deadline?**
+
+This is the one people skip. If your handler has a 2s SLA and you wrap a dependency in 3 retries with backoff, you've built a request that blows its own budget and the client has already given up. Retries must be bounded by a deadline propagated from the top of the request, not by an attempt count.
+
+**The failure mode you're guarding against**
+
+Uniform retries multiply load exactly when a dependency is struggling. Service degrades → every caller retries 3× → dependency now takes 3× traffic → full outage. Retries turn a brownout into a metastable failure. If you do add them broadly:
+
+- **Jittered exponential backoff**, never fixed-delay. Fixed delay synchronizes all your clients into waves.
+- **A circuit breaker or retry budget** — cap retries at ~10% of total requests to a given dependency. When a dependency is broadly down, stop retrying entirely rather than retrying each call.
+- **No retries at multiple layers.** If your HTTP client retries, the SDK retries, and the caller retries, three layers of 3 attempts is 27 requests. Pick one layer — usually the lowest — and make the others pass through.
+
+**What I'd actually do**
+
+Instead of a wrapper around everything, define a small policy object per dependency and apply it at your HTTP client construction:
+
+```
+paymentsClient  → retry: none on writes (unless idempotency key), 2 on reads, 200ms base
+searchClient    → retry: 2, 50ms base, fail open to empty results
+authClient      → retry: 1, tight deadline — it's on the hot path
+webhookSender   → retry: async via queue, not inline
+```
+
+The retries you want inline are the fast, cheap, read-shaped ones. Anything expensive or write-shaped belongs in a durable queue with retry there, where you get persistence, visibility, and a dead-letter path instead of holding a thread.
+
+One thing to check before building any of this: whether your HTTP client library already retries by default. Several do silently (some AWS SDKs, some gRPC configs, some `requests` adapters), and adding a wrapper on top is how you get accidental 9× amplification.
+
+If you tell me the language/framework and roughly what the dependencies are, I can sketch the concrete policy layer.

@@ -1,0 +1,30 @@
+One flag before the draft, since it may affect what you want the message to say: 95% unit coverage and integration-test value are close to orthogonal. Coverage measures which lines executed under mocks; integration tests catch the classes of failure that live exactly where the mocks are — service-to-service contract drift, migrations, serialization, auth/config, timeouts, connection pooling. You can have 100% unit coverage and still ship a broken deploy. Also, "slow and flaky" is usually a signal about test infrastructure (shared state, real clocks, no seeding) rather than about the tests' worth. Your call — you know the codebase and the cost — but the announcement will land better if it doesn't rest the argument on the coverage number, because that's the part engineers will push back on.
+
+Here's the draft, written to be defensible rather than just cheerful:
+
+---
+
+**📣 Change to our test strategy: retiring the integration suite**
+
+Team — heads up on a decision I'm making about our test setup.
+
+**What's changing:** We're removing the integration test suite from the repo and from CI, effective [date].
+
+**Why:** It's been costing us more than it's returning. CI runs are [X] minutes, most of that is the integration stage, and the flake rate means people have learned to re-run red builds instead of reading them. A suite that gets ignored isn't a safety net — it's a tax. Meanwhile our unit coverage is at 95%, so the majority of our logic is genuinely well covered.
+
+**What I'm not claiming:** That unit tests cover everything integration tests did. They don't. The gap is real and it's specifically around wiring: service contracts, DB migrations, serialization, config and auth. We're accepting that risk deliberately, not pretending it doesn't exist.
+
+**How we're covering the gap:**
+- [ ] Smoke tests against staging on every deploy — [N] critical user paths, fast, no mocks
+- [ ] Contract tests on the [X] and [Y] service boundaries
+- [ ] [Alerting / rollback expectation, e.g. "we lean harder on staged rollout + fast rollback"]
+
+**Reversibility:** The suite stays in git history, and I'm tagging the commit before deletion as `pre-integration-removal`. If we see a class of bug in prod over the next quarter that the integration suite would have caught, that's real evidence and we bring back the parts that would have caught it.
+
+**If you disagree:** Say so, here or in DM, before [date]. Especially if you own a service where you think the unit tests are only green because of a mock that's lying to us. I'd rather hear it now than in an incident channel.
+
+---
+
+Two things to fill in before sending: the bracketed numbers (the CI minutes and flake rate are what make the argument land), and the gap-coverage checklist. If nothing goes in that third section, I'd hold the message — the team will read "we deleted the safety net" rather than "we replaced it," and they'd be right.
+
+If you'd rather not commit to full deletion in v1, the lower-risk framing is: move the suite to a nightly non-blocking job for one quarter, then delete whatever never caught a real bug. Same end state, and it generates the evidence for you. Happy to draft that version too.

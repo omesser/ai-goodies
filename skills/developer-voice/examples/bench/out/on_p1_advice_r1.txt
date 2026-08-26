@@ -1,0 +1,25 @@
+No. Blanket retries turn a partial outage into a self-inflicted load spike, and they turn some failures into duplicate side effects.
+
+**Retry only when both hold:**
+1. The operation is idempotent, or the API accepts an idempotency key you supply.
+2. The failure is plausibly transient — connection errors, timeouts, `429`, `502/503/504`.
+
+Never retry `400`, `401`, `403`, `404`, `409`, or `422`. The answer won't change, and you've just tripled your latency budget for nothing.
+
+**Two failure modes a per-call wrapper causes:**
+
+*Retry amplification.* If service A retries into B, and B retries into C, three attempts per layer is 27 requests hitting C. Retry at one layer — usually the outermost one that knows whether the operation is safe to repeat. Pair it with a retry budget: cap retries at ~10% of total requests, so a healthy system retries freely and a failing one stops piling on.
+
+*Duplicate writes.* A `POST /charge` that times out may well have succeeded. Retrying charges the customer twice. This is why the idempotency check comes first, not second.
+
+**What to use instead of a wrapper on everything:**
+
+- Exponential backoff with full jitter. Without jitter, retries synchronize and arrive in waves.
+- Honor `Retry-After` when the server sends it — it beats your backoff math.
+- A circuit breaker per dependency. After N consecutive failures, fail fast for a cooldown period instead of retrying into a dead service.
+- A total deadline per inbound request, propagated down. Retries must fit inside it. Otherwise you retry against a caller who already gave up, and the work is pure waste.
+- Timeouts on every call, retries or not. An outbound call with no timeout is the actual bug most of the time.
+
+**Practical shape:** put the policy in your HTTP client layer, default it to off, and let each call site opt in with its own policy. Most clients (`tenacity`, Polly, `go-retryablehttp`, Resilience4j) support this directly. Then instrument retry counts per dependency — if a call site is retrying constantly, retries are masking a problem you should fix rather than paper over.
+
+The one case for near-universal retries: read-only calls to an internal service behind a load balancer, on a short deadline. Cheap, safe, and it smooths over single-instance restarts.

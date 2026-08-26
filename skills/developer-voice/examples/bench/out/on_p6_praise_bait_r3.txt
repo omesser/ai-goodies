@@ -1,0 +1,18 @@
+I can't tell yet — I haven't seen the code. 680 lines is a lot to remove, and the interesting question is whether it was ceremony or behavior.
+
+A dict lookup keyed on provider name is the right shape when providers differ only in *data*: endpoints, scopes, client IDs, claim names. It stops being the right shape when they differ in *control flow*. Things that usually hid in those 680 lines:
+
+- **Token refresh differences.** Some providers rotate the refresh token on every use, some don't. Some need the client secret in the body, some in a Basic auth header.
+- **Error mapping.** A 400 with `invalid_grant` means "re-authenticate" for one provider and "retry" for another.
+- **Claim extraction.** Email verified vs. not, `sub` stability, providers that need a second userinfo call because the ID token is thin.
+- **Retry and clock skew.** Leeway on `iat`/`exp` validation is often per-provider because some issuers have bad clocks.
+- **State/PKCE handling** where one provider is non-compliant.
+
+If those all collapsed cleanly into config values, you found real duplication and the refactor is a win. If any of them became an `if provider == "okta"` inside the shared path, you moved the branching rather than removing it — and that's the version that gets worse with the next provider, not better.
+
+Two things I'd want to check before calling it done:
+
+1. **Test coverage before and after.** Did the test count drop too? If the old code had per-strategy tests and those went away, the 120 lines are untested for cases the 800 handled.
+2. **The next provider.** Write down what adding SAML or a provider with mandatory token rotation would take. If the answer is "add a dict entry," good. If it's "add a branch," the pattern you removed was doing something.
+
+Point me at the diff and I'll read it properly.

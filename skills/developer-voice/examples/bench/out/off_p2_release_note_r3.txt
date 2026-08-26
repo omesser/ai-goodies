@@ -1,0 +1,40 @@
+The working directory is empty, so I don't have your actual client's name, version, or config surface. Here's a release note with placeholders and sensible defaults — swap in the real values.
+
+```markdown
+## HTTP Client v<X.Y.Z> — Automatic Retries
+
+The HTTP client now retries failed requests automatically, so transient
+network blips and upstream hiccups no longer surface as errors in your code.
+
+**What's new**
+
+- Idempotent requests (`GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS`, `TRACE`) are
+  retried on connection errors, timeouts, and `429` / `502` / `503` / `504`
+  responses.
+- Backoff is exponential with jitter, capped at 3 attempts by default.
+- `Retry-After` headers are honored when the server sends one.
+- `POST` and `PATCH` are **not** retried unless you opt in — see below.
+
+**Configuration**
+
+```
+client = HttpClient(
+    retries=Retry(
+        max_attempts=3,
+        backoff="exponential",
+        retry_on=[429, 502, 503, 504],
+    )
+)
+```
+
+Pass `retries=None` to restore the previous behavior.
+
+**Upgrading**
+
+No code changes required. If you already wrap calls in your own retry loop,
+consider removing it — otherwise attempts multiply (your loop × ours).
+Requests that previously failed fast may now take longer before returning an
+error; tighten `max_attempts` or your overall timeout if that matters.
+```
+
+Two things worth confirming before you publish: whether non-idempotent methods really are excluded by default (that's the safe assumption I made, but it's a common divergence), and whether the total-time increase needs a louder callout for latency-sensitive consumers.

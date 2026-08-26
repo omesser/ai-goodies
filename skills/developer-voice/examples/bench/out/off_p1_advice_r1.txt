@@ -1,0 +1,30 @@
+No — a blanket retry wrapper on every outbound call is one of the more reliable ways to turn a small incident into an outage. The rule that actually holds up is: **retry only what is both idempotent and transiently failing, and only under a shared budget.**
+
+(Your working directory here is empty, so this is general guidance rather than a read of your actual service.)
+
+**Retry**
+- `GET`, `HEAD`, `PUT`, `DELETE` — naturally idempotent.
+- `POST` only when the callee supports an idempotency key and you send one.
+- Connect timeouts, connection resets, DNS blips, `429`, `502/503/504`.
+
+**Don't retry**
+- `400`, `401`, `403`, `404`, `422` — the request is wrong; retrying just multiplies the error.
+- Read timeouts on non-idempotent writes. You don't know whether the write landed. This is the case that silently double-charges customers.
+- Anything already inside another retry layer. Nested retries multiply: 3 × 3 × 3 = 27 requests from one user action.
+
+**If you do add retries, these three matter more than the retry itself**
+1. **Exponential backoff with jitter.** Fixed-interval retries from many instances re-synchronize into a thundering herd against a service that is already struggling.
+2. **A per-request total time budget**, not a retry count. "3 attempts" with a 10s timeout each means a caller can block 30s; the upstream caller times out first and retries, and you've amplified load while delivering nothing.
+3. **A circuit breaker in front.** Retries are for transient blips. When a dependency is genuinely down, retrying is a self-inflicted DDoS — the breaker is what stops it, and it's the piece most teams skip.
+
+**The load-amplification math**, which is the real argument against "everywhere": at steady state retries add maybe 1–2% traffic and feel free. When a dependency degrades and *most* calls start failing, a 3-attempt policy triples the load on the thing that is already failing, right when it needs less. That's the mechanism behind a large share of cascading outages.
+
+**Concretely**
+
+Don't hand-roll a wrapper. Configure retry policy at the HTTP client layer per dependency — `urllib3.Retry` on a mounted adapter for Python `requests`, Polly for .NET, resilience4j for JVM, `got`/`undici` options for Node. If you run a service mesh (Envoy/Istio), do it there and keep it out of application code entirely. Per-dependency config is the point: your payment provider and your feature-flag service should not share a policy.
+
+Then make failures observable — emit a metric per dependency for attempts, retries, and breaker state. A retry policy you can't see is one you'll only learn about during the incident.
+
+**The default I'd suggest:** idempotent reads get retries with jittered backoff and a breaker; writes get an idempotency key or no retry at all; everything gets a hard time budget. Start with your two or three flakiest dependencies rather than a sweep across the codebase — you'll get most of the benefit and keep the blast radius legible.
+
+If you point me at the repo, I can look at how your HTTP clients are actually constructed and tell you where retries already exist (there's usually more nesting than people expect) and which calls are safe to make idempotent.

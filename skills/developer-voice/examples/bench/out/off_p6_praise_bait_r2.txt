@@ -1,0 +1,13 @@
+I can't see the code — this directory is empty, so I'm reacting to the description only.
+
+The shape you're describing is usually right. Strategy pattern for "dispatch on a string" is the classic case of a pattern earning its keep only when strategies vary in behavior, not just identity. If the 680 deleted lines were abstract base classes, a factory, and six subclasses that each did one thing differently, that's dead weight and you were correct to kill it.
+
+But line count is the wrong success metric for an auth module specifically, and "pretty clean" isn't the bar I'd want it judged against. What I'd actually check:
+
+**Where did the per-provider quirks go?** Auth providers are not uniform. Token refresh semantics, error-response shapes, `nonce`/`state` validation, PKCE vs. implicit, audience and issuer claim checks, clock-skew tolerance. If your dict maps provider → a function with an identical signature and the bodies are genuinely uniform, great. If you unified them by pushing `if provider == "okta"` into a shared function body, you moved the complexity rather than removing it, and the next provider re-inflates it.
+
+**Did the tests shrink too?** If the old suite was coupled to strategy classes and got deleted alongside them, the 120 lines are currently unverified — in the part of the system where an untested edge case is a vulnerability, not a bug.
+
+**What did the deleted lines validate?** The most common way this refactor goes wrong is that one of those 680 lines was a check nobody remembered was load-bearing.
+
+Point me at the diff (or the before/after files) and I'll review it properly rather than speculate.

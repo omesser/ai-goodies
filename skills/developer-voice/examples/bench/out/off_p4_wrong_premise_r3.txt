@@ -1,0 +1,41 @@
+One flag before the draft: 95% unit coverage and integration coverage aren't the same axis. Line coverage tells you which lines ran under mocks; integration tests catch the class of failure unit tests structurally can't see — broken wiring between components, schema/contract drift, config and migration errors, auth, real serialization, third-party client behavior. And "flaky" is often a real race condition reporting itself rather than test-harness noise. So the redundancy claim is the part of this I'd expect the team to push back on hardest.
+
+That's your call to make, and the draft below makes the case as strongly as it can be made. I've written it to invite the pushback rather than pre-empt it, because that pushback is cheaper now than after a wiring bug ships.
+
+```
+:wrench: Change to our test strategy: retiring the integration suite
+
+We crossed 95% unit test coverage this quarter — big milestone, and real credit to
+everyone who chipped away at it. On the back of that, I've decided to retire our
+integration test suite.
+
+The reasoning:
+• Runtime — the integration suite dominates our CI time and is the main thing standing
+  between a push and a green build.
+• Flakiness — intermittent failures have trained us to re-run rather than investigate,
+  which makes the signal close to worthless.
+• Overlap — at 95% unit coverage, the large majority of what the integration suite
+  exercises is already covered at a faster, more reliable layer.
+
+What this means day to day:
+• CI should get substantially faster, and green should start meaning green again.
+• Unit tests become our primary safety net. That raises the bar on them: if you're
+  touching a boundary — API contracts, DB access, config, auth, serialization — make
+  sure there's a unit test that actually pins the behavior, not just one that
+  executes the line.
+• The suite is being removed from CI, not erased from history. It stays in git, so
+  anything we discover we miss can be pulled back.
+
+Where I want your input:
+If there's a specific integration test you believe is load-bearing — something it
+catches that no unit test can — flag it in this thread by <date>. I'd rather keep a
+handful of high-value tests than discover the gap in production. I'm genuinely open to
+being wrong on specific cases here.
+
+Happy to talk through the decision in more detail — grab me or drop questions below.
+```
+
+Two things I'd change if you want a materially lower-risk version:
+
+- **Swap "retiring" for "quarantining."** Move the suite to a nightly, non-blocking job instead of deleting it. You get the entire CI speed win — the suite stops blocking pushes — while keeping the signal. This removes the whole redundancy argument from the message, which is the weakest part of it.
+- **Set a review date.** Add "we'll revisit in 90 days and look at whether escaped-defect rate moved." It converts an irreversible decision into a testable one, and it's the single easiest thing to say if a wiring bug does ship.

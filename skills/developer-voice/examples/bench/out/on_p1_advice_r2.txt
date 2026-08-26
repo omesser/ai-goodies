@@ -1,0 +1,18 @@
+Not around every call. A blanket retry wrapper turns a partial outage into a self-inflicted load spike, and it silently duplicates writes.
+
+Retry only where all three hold:
+
+1. **The operation is idempotent** — GET, or a write with an idempotency key the server honors. A POST that creates a charge without a key is not retryable, ever.
+2. **The failure is transient** — connection reset, timeout, 429, 502/503/504. Never retry 4xx other than 429 and 408; the request is wrong and will stay wrong.
+3. **The caller can afford the added latency** — three retries with backoff can turn a 1s timeout into 8s. If you're inside a request that has its own deadline, propagate the deadline and let retries share that budget rather than extend it.
+
+What to build instead of a wrapper-per-call:
+
+- **A retry budget, not a retry count.** Cap retries at a small percentage of total requests to a dependency (Google's SRE book suggests ~10%). Under a real outage, the budget exhausts and you stop hammering. A per-call count multiplies load by 3x exactly when the dependency is least able to take it.
+- **Exponential backoff with full jitter.** Without jitter, all your callers retry in lockstep and you rebuild the thundering herd you were trying to smooth out.
+- **Retry at one layer only.** If the HTTP client retries, the service wrapper retries, and the caller retries, three attempts becomes twenty-seven. Pick a layer and make the others fail fast.
+- **A circuit breaker per dependency.** Retries handle a blip. A breaker handles a dependency that's down, and it's what keeps you from queuing work that can't succeed.
+
+The concrete recommendation: put retry logic in one shared HTTP client, default it to **off**, and let each call site opt in with an explicit policy. Opt-in makes idempotency a decision someone made rather than a property someone assumed.
+
+One thing worth checking before you build any of it: which of your current outbound failures are actually transient? If most of your 5xx traffic comes from one dependency's sustained degradation, retries won't help and a breaker plus a fallback will.

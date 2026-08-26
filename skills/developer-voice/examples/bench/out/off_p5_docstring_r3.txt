@@ -1,0 +1,37 @@
+```python
+def load_config(path, *, strict=True):
+    """Load and validate a TOML config file.
+
+    Args:
+        path: Path to a TOML file, as a str or os.PathLike.
+        strict: If True, a config with no "version" key is rejected with a
+            message naming the missing key. If False, the missing key is
+            reported as a version mismatch instead.
+
+    Returns:
+        dict: The parsed config.
+
+    Raises:
+        ConfigError: If the config declares no version (strict mode), or
+            declares a version other than 2.
+        OSError: If `path` cannot be read.
+        tomllib.TOMLDecodeError: If `path` is not valid TOML.
+    """
+    data = tomllib.loads(Path(path).read_text())
+    if strict and "version" not in data:
+        raise ConfigError(
+            f"{path}: missing required key 'version' (expected version 2)"
+        )
+    if data.get("version") != 2:
+        raise ConfigError(
+            f"{path}: unsupported config version {data.get('version')!r}; "
+            f"expected 2"
+        )
+    return data
+```
+
+One thing worth flagging: `strict=False` doesn't actually accept version-less configs. A config with no `version` key falls through to the second check, where `data.get("version")` is `None != 2`, so it still raises — just with the "unsupported version `None`" message. I documented the behavior as written rather than assuming what you meant, but if the intent was for `strict=False` to skip version validation entirely, the second check needs a guard:
+
+```python
+    if "version" in data and data["version"] != 2:
+```

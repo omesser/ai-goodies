@@ -1,0 +1,50 @@
+Here it is. One thing to flag first: as written, `strict` doesn't do what its name suggests — if `version` is missing and `strict=False`, the second check still fires (`None != 2`), so the config is rejected either way. `strict` only selects *which* error you get. I've documented the actual behavior rather than the intended one, and phrased the messages so they stay accurate; the fix is a one-liner if you want it (noted below).
+
+```python
+def load_config(path, *, strict=True):
+    """Load and validate a TOML config file.
+
+    Reads the TOML document at *path* and returns it as a dict, rejecting
+    anything that is not a version 2 config.
+
+    Args:
+        path: Path to the TOML config file. Accepts anything ``Path()``
+            accepts (``str``, ``os.PathLike``).
+        strict: When true, a missing ``version`` key is reported as a distinct
+            "missing key" error. When false, the missing key falls through to
+            the version check and is reported as an unsupported version.
+            Either way the config is rejected — see Note.
+
+    Returns:
+        dict: The parsed config document.
+
+    Raises:
+        ConfigError: If ``version`` is absent, or is anything other than ``2``.
+        OSError: If *path* cannot be read.
+        tomllib.TOMLDecodeError: If the file is not valid TOML.
+
+    Note:
+        ``strict=False`` does not permit version-less configs; it only changes
+        the error message they produce.
+    """
+    data = tomllib.loads(Path(path).read_text())
+    if strict and "version" not in data:
+        raise ConfigError(f"{path}: config is missing required key 'version'")
+    if data.get("version") != 2:
+        raise ConfigError(
+            f"{path}: unsupported config version {data.get('version')!r}, expected 2"
+        )
+    return data
+```
+
+Notes on the messages:
+
+- Both lead with `path` so the error is actionable when configs are loaded in a loop or from a search path.
+- `!r` on the version value keeps `"2"` (string) distinguishable from `2` (int) — that's the most common real failure here, and without the repr the message reads as nonsense (`unsupported config version 2, expected 2`).
+- When `version` is missing and `strict=False`, that second message renders as `unsupported config version None, expected 2`, which is honest but not great. If you'd rather `strict=False` actually tolerate a missing version, change the second check to:
+
+  ```python
+  if "version" in data and data["version"] != 2:
+  ```
+
+  That makes `strict` a real switch, but it also means a version-less config is silently accepted as v2 — your call which behavior you want.

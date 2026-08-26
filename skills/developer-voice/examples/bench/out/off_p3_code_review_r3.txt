@@ -1,0 +1,84 @@
+Here's what I'd leave on the PR.
+
+---
+
+### 🔴 Blocking: SQL injection on the `INSERT`
+
+```python
+db.execute("INSERT INTO payments (user, amount) VALUES ('%s', %s)" % (p['user'], p['amount']))
+```
+
+`p['user']` is interpolated straight into the statement. A user value of `'); DROP TABLE payments;--` is game over, and `amount` isn't even quoted, so a non-numeric value injects too. This needs to be a parameterized query — pass the values as the driver's second argument so it binds them:
+
+```python
+db.execute("INSERT INTO payments (user, amount) VALUES (%s, %s)", (p["user"], p["amount"]))
+```
+
+Note the `%s` placeholders here are the DBAPI's, not Python's — no `%` operator.
+
+### 🔴 Blocking: retrying a non-idempotent INSERT can double-charge
+
+If the INSERT commits but the connection drops before we read the response, we raise, retry, and insert a second payment row for the same payment. That's real money charged twice. Needs an idempotency key on the payment plus a unique constraint on the column, so the retry hits the constraint instead of duplicating:
+
+```sql
+INSERT INTO payments (idempotency_key, user, amount) VALUES (%s, %s, %s)
+ON CONFLICT (idempotency_key) DO NOTHING
+```
+
+Retrying writes safely is the hard part of this function — I'd want it settled before merge.
+
+### 🔴 Blocking: failures are silently swallowed
+
+When all retries are exhausted we `print` and move on. The caller gets a `results` list that's shorter than `payments`, with no way to tell *which* payments are missing — the indices don't line up either. For a payments path, a caller that reads `len(results)` as "all good" is a plausible bug.
+
+Return a per-payment outcome (or raise, or accumulate a `failures` list) so the caller can reconcile. At minimum this shouldn't be a `print` — use `logging.exception` so we get the traceback and it lands in the log pipeline rather than stdout.
+
+### 🟠 `except Exception` retries things that will never succeed
+
+The bare catch treats every error as transient. A `KeyError` from `p['user']` (a malformed payment dict), a constraint violation, or a syntax error in the SQL will each be retried three times with backoff, then dropped — 6 seconds of sleeping to reach the same failure. Catch the driver's transient errors specifically (`OperationalError`/`InterfaceError` or equivalent) and let everything else propagate.
+
+Related: after a failed statement many drivers leave the transaction in an aborted state, so subsequent `execute` calls fail until a rollback. The retry needs to roll back (or re-acquire the connection) before trying again.
+
+### 🟠 `time` is not imported
+
+`time.sleep` will raise `NameError` on the first retry — which suggests the retry path isn't covered by tests. Worth adding a test that forces a transient failure.
+
+### 🟡 Sleeps after the final attempt
+
+On the last iteration we log the failure and then still sleep `2 ** (retries - 1)` seconds before exiting the loop. Move the sleep to only run when another attempt is coming.
+
+Also consider jitter on the backoff — if a batch of payments hits a DB blip together, they'll all retry in lockstep.
+
+### 🟡 `amount` as a float
+
+If these are floats, money arithmetic will drift. Prefer `Decimal` or integer minor units, and make sure the column type matches.
+
+### 🟢 Nits
+
+- `user` is a reserved word in Postgres and needs quoting; `user_id` would sidestep it.
+- Per-row round trips will be slow for large batches — `executemany` or a multi-row insert is worth it if batch sizes get big, though it complicates the per-payment error handling above.
+- No type hints or docstring; `retries=3` reads as "3 retries" but is actually 3 total attempts.
+
+---
+
+Roughly what I'd expect the result to look like:
+
+```python
+def process_payments(payments, db, attempts=3):
+    results = []
+    for p in payments:
+        for attempt in range(attempts):
+            try:
+                results.append(_insert_payment(db, p))
+                break
+            except TransientDBError:
+                db.rollback()
+                if attempt == attempts - 1:
+                    logger.exception("payment failed permanently", extra={"key": p["idempotency_key"]})
+                    results.append(Failed(p))
+                    break
+                time.sleep(backoff_with_jitter(attempt))
+    return results
+```
+
+The two I'd actually hold the PR on are the injection and the double-charge risk; the rest is normal review back-and-forth.
