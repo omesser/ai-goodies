@@ -1,51 +1,34 @@
 # Voice OFF (baseline)
 
-`DEV_VOICE_OFF=1 claude -p`. Neither developer-voice nor ponytail in context.
+`DEV_VOICE_OFF=1 claude -p`. All persona and tooling plugins disabled — ponytail, context-mode, superpowers,
+and last30days. See [README.md](README.md) for why that matters and what the runs showed.
 
-Verbatim output. See [README.md](README.md) for method and analysis.
-
-**This is the baseline — the register the skill exists to replace. Don't imitate it.**
+**Baseline output. Not a model to imitate, and not a failure case either — see the README.**
 
 
-Prompts 3-5 ran twice per arm; rep 1 is shown here and both reps are counted in the
-variance figures in the README.
+Repetition 1 of 2 is shown. Both repetitions are in [`raw/`](raw/) and both are counted
+in the README's figures.
 
 ---
 
-## Prompt 1 — advice
+## Prompt 1 — retry advice (chat)
 
 > Should I add a retry wrapper around every outbound HTTP call in our service?
 
-Short answer: no. Retry-everywhere is one of those changes that looks like added resilience and is actually added blast radius.
+No. Blanket retries turn one bad dependency into a self-inflicted DDoS, and they're wrong on non-idempotent calls.
 
-**Why blanket retries hurt**
+**What actually holds:**
 
-- **Non-idempotent calls get duplicated.** A `POST /charge` that times out may well have succeeded server-side. A blind retry double-charges. Timeouts are the ambiguous case, and they're exactly the case retries fire on.
-- **Retry amplification.** If your gateway retries 3×, your service retries 3×, and your HTTP client retries 3×, a struggling downstream sees 27× load precisely when it's least able to take it. This is the classic mechanism that turns a partial degradation into a full outage.
-- **Latency budget blowout.** Wrapping a call that already has a 10s timeout in 3 attempts means a request that used to fail in 10s now fails in 30s+ — while holding a connection, a thread, and upstream client patience.
-- **It hides real failures.** A dependency at 5% error rate silently retried into 0.1% visible error rate is a dependency nobody fixes until it's at 40%.
+1. **Timeouts first.** A missing timeout causes more outages than a missing retry. If any call lacks one, fix that and stop — you may not need retries at all.
+2. **Use the client's built-in retry.** `requests`+`urllib3 Retry`, `httpx` transport `retries`, Go's `http.Client` via `hashicorp/go-retryablehttp`, node `undici` `RetryAgent`, AWS/GCP SDKs already retry. Configure, don't wrap.
+3. **Only retry idempotent + transient.** GET/PUT/DELETE, plus POST *only* with an idempotency key. Retry on connect errors, 502/503/504, 429 (honor `Retry-After`). Never on 4xx, never on a read timeout for a non-idempotent POST — the server may have already done the work.
+4. **Cap it.** 2–3 attempts, exponential backoff **with jitter**, and a total budget bounded by the caller's own deadline. A 3-attempt retry inside a 3-deep call chain is 27 requests.
 
-**What to do instead**
+**Where a wrapper is the wrong shape:** if a dependency is failing often enough that retries matter, you want a circuit breaker, not more attempts. Retries paper over the symptom until they amplify it.
 
-Retry per-call-site, gated on two independent questions:
+What I'd actually do: audit for missing timeouts, set one client-level retry policy (idempotent methods + the four status codes above, 3 attempts, jittered), and leave every non-idempotent POST alone unless it has an idempotency key.
 
-1. **Is the operation safe to repeat?** GETs and other reads: yes. Writes: only with an idempotency key that the *server* honors, or a naturally idempotent semantic (PUT of a full resource, DELETE).
-2. **Is this failure class retryable?** Connection refused/reset, 429, 502/503/504, and DNS failures — yes. 400/401/403/404/409/422 — never; you'll just fail three times slower.
-
-And when you do retry:
-
-- **Exponential backoff with full jitter**, not fixed delay — synchronized retries from many instances are a self-inflicted thundering herd.
-- **Honor `Retry-After`** on 429/503.
-- **A deadline, not an attempt count.** Propagate a remaining-time budget through the call chain, and don't start an attempt you can't finish inside it. Attempt counts compose badly; deadlines compose correctly.
-- **A retry budget** — cap retries at some small fraction of total requests (e.g. 10%). This is the single most effective guard against amplification, and it's what gRPC and Envoy both do.
-- **Circuit breaker in front.** Retrying into a downstream that's hard down is pure waste; fail fast and shed.
-- **Retry at exactly one layer.** Pick it deliberately, and turn it off everywhere else. Most client libraries have retries on by default — check.
-
-**The pragmatic move**
-
-Don't write a wrapper you sprinkle by hand — that guarantees inconsistency. Configure it in your HTTP client/service mesh so the policy is declarative and per-route, then set the default to *no retries* and opt in route by route. Emit a metric per retry (attempt number, outcome, call site) so you can see amplification before it bites.
-
-If you tell me what language/stack and whether you're behind a mesh, I'll sketch the concrete config or interceptor — and if you want, we can walk your actual outbound call sites and classify them.
+→ skipped: per-call wrappers, circuit breakers, retry metrics. Add the breaker when one dependency's error rate is what pages you.
 
 ---
 
@@ -53,31 +36,19 @@ If you tell me what language/stack and whether you're behind a mesh, I'll sketch
 
 > Write a short release note announcing that our HTTP client now supports automatic retries.
 
-I don't have the repo or config details here, so I've used placeholders for the name/version and assumed common defaults (exponential backoff + jitter, idempotent methods and 429/5xx only). Swap those to match the actual implementation.
+**HTTP client: automatic retries**
+
+The HTTP client now retries failed requests automatically. Transient failures — connection errors, timeouts, and `429`/`5xx` responses — are retried with exponential backoff instead of surfacing immediately.
+
+- Enabled by default; no code changes needed.
+- Only idempotent requests are retried.
+- `Retry-After` is honored when the server sends it.
+- Configurable per client: max attempts, backoff, and which status codes count as retryable.
+
+Fewer spurious failures from blips, and less hand-rolled retry logic in calling code.
 
 ---
-
-## Automatic retries in `<HttpClient>` — v`<X.Y.0>`
-
-The HTTP client now retries failed requests automatically. Transient failures — connection errors, timeouts, `429`, and `5xx` responses — are retried with exponential backoff and jitter, so a brief network blip or an upstream hiccup no longer surfaces as an error in your code.
-
-**Defaults**
-- Up to **3 retries** per request
-- **Exponential backoff with jitter**, honoring `Retry-After` when the server sends it
-- Only **idempotent** requests (`GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS`) are retried by default
-
-**Configuring it**
-
-```
-client = HttpClient(retries=5, backoff="exponential", retry_on=[429, 502, 503, 504])
-client = HttpClient(retries=0)   # opt out
-```
-
-No changes are required to pick this up — existing code gets retries on upgrade. If you already wrapped calls in your own retry loop, set `retries=0` to avoid compounding the two.
-
----
-
-Two things worth confirming before you publish: whether retries are on by default (that's the biggest behavioral note for existing users), and whether non-idempotent methods like `POST` are excluded.
+Wrote it generic — swap in your client's name, actual defaults (attempt count, backoff base), and config API before publishing.
 
 ---
 
@@ -99,85 +70,58 @@ Two things worth confirming before you publish: whether retries are on by defaul
 >                 time.sleep(2 ** attempt)
 >     return results
 
-Here's what I'd leave on the PR:
-
----
-
 ## Blocking
 
-**1. SQL injection — `line 6`**
-
+**1. SQL injection.** `"...VALUES ('%s', %s)" % (p['user'], p['amount'])` — a user named `'); DROP TABLE payments;--` owns your DB. Parameterize:
 ```python
-"INSERT INTO payments (user, amount) VALUES ('%s', %s)" % (p['user'], p['amount'])
+db.execute("INSERT INTO payments (user, amount) VALUES (?, ?)", (p['user'], p['amount']))
 ```
+Not negotiable, and it's a smaller diff than what's there.
 
-This is string interpolation into SQL, not parameter binding. A `user` value of `x'); DROP TABLE payments; --` executes. Use the driver's placeholders and pass params as a tuple:
-
-```python
-db.execute("INSERT INTO payments (user, amount) VALUES (%s, %s)", (p["user"], p["amount"]))
-```
-
-Note the quotes around `'%s'` also disappear — the driver handles quoting/escaping/typing. Right now `amount` is unquoted, so a `None` amount interpolates the literal string `None` and produces a syntax error rather than a NULL.
-
-**2. Retrying a non-idempotent INSERT can double-charge**
-
-The most common transient failure is "statement executed, connection dropped before we got the ack." This code retries that, inserting a second payment row. In a payments path that's a duplicate charge, and the retry loop makes it up to 3×.
-
-This needs an idempotency key on the payment plus a unique constraint, so a retry is a no-op rather than a second row:
-
+**2. Retry without idempotency = double charges.** If the INSERT succeeds but the connection drops before the ack, you retry and insert again. This is a money path; the retry loop is actively dangerous without a unique key:
 ```sql
-INSERT INTO payments (payment_id, user, amount) VALUES (%s, %s, %s)
-ON CONFLICT (payment_id) DO NOTHING
+INSERT INTO payments (idempotency_key, user, amount) VALUES (?, ?, ?)
+ON CONFLICT (idempotency_key) DO NOTHING
 ```
+Where does `p` get its key? If payments don't have stable IDs upstream, that's the real bug to fix first.
 
-Without that, I'd rather see no retry at all than this retry.
+**3. Failures vanish silently.** After 3 attempts the loop just moves on. `results` is shorter than `payments` and nobody can tell which ones dropped. Caller gets a partial list with no signal. Either raise, or return `(succeeded, failed)`.
 
-**3. Failures are silently swallowed**
-
-After the last attempt it `print`s and moves to the next payment. The caller gets back a `results` list with no way to know that payment #4 never landed — and no way to correlate entries back to inputs, since a failed payment just leaves a gap. For money movement, this should either raise or return an explicit `(succeeded, failed)` pair. Your call on the contract, but "partial failure looks identical to full success" isn't viable.
-
-**4. `except Exception` retries bugs**
-
-`p['user']` raising `KeyError`, a `TypeError`, a constraint violation on a genuinely invalid payment — none of those get better on retry. You'll burn 3 attempts and 6 seconds of `sleep` per malformed record before giving up. Catch the driver's transient errors specifically (`OperationalError`, `InterfaceError`, or whatever your driver exposes) and let everything else propagate.
+**4. `except Exception` retries everything.** A constraint violation, a `KeyError` on `p['user']`, a typo in the column name — all retried 3× with backoff, then swallowed. Catch the driver's transient/operational error only; let the rest propagate.
 
 ## Non-blocking
 
-- **Sleeps after the final attempt.** `time.sleep` runs unconditionally in the handler, so a payment that exhausts its retries still sleeps 4s before the loop exits. Guard with `if attempt < retries - 1`.
-- **No jitter in the backoff.** If this runs across several workers that fail together, they'll all retry in lockstep. `2 ** attempt + random.uniform(0, 0.5)`.
-- **`print` → `logging`.** And log the payment identifier alongside the error; `"failed: <str(e)>"` isn't enough to find the record afterwards. Use `logger.exception` / `exc_info` to keep the traceback.
-- **`time` isn't imported** in the snippet as written.
-- **Column named `user`** is a reserved word in Postgres and will need quoting (`"user"`). Worth renaming to `user_id` if this table is new.
-- **No transaction handling.** Is `db.execute` autocommitting? If these should land atomically as a batch, that's a different structure. Also, N round trips where an `executemany`/batch insert would do — probably fine at current volumes, flagging for when it isn't.
-- **Missing type hints and a docstring** on a public-ish function handling money.
+- `time` isn't imported. Presumably a paste artifact, but the file won't run.
+- Sleeps after the *last* attempt — 4 seconds of nothing per failed payment. Move the sleep to `if attempt < retries - 1`.
+- `print` → `logging.exception(...)`. And log *which* payment failed; `"failed: <str(e)>"` is unactionable at 3am.
+- No commit/transaction visible. If `db` isn't autocommit this writes nothing. If it is, there's no atomicity across the batch — worth being explicit about which you want.
+- `amount` as a float will bite you. `Decimal` or integer minor units.
 
-## Suggested shape
+## Sketch
 
 ```python
-TRANSIENT = (driver.OperationalError, driver.InterfaceError)
-
 def process_payments(payments, db, retries=3):
-    results, failures = [], []
+    succeeded, failed = [], []
     for p in payments:
-        last_error = None
         for attempt in range(retries):
             try:
-                results.append(db.execute(
-                    'INSERT INTO payments (payment_id, "user", amount) VALUES (%s, %s, %s) '
-                    "ON CONFLICT (payment_id) DO NOTHING",
-                    (p["id"], p["user"], p["amount"]),
-                ))
+                succeeded.append(db.execute(
+                    "INSERT INTO payments (idempotency_key, user, amount) VALUES (?, ?, ?) "
+                    "ON CONFLICT (idempotency_key) DO NOTHING",
+                    (p['id'], p['user'], p['amount'])))
                 break
-            except TRANSIENT as e:
-                last_error = e
-                if attempt < retries - 1:
-                    time.sleep(2**attempt + random.uniform(0, 0.5))
-        else:
-            logger.error("payment %s failed after %d attempts", p["id"], retries, exc_info=last_error)
-            failures.append((p, last_error))
-    return results, failures
+            except db.OperationalError:
+                if attempt == retries - 1:
+                    logging.exception("payment %s failed after %d attempts", p['id'], retries)
+                    failed.append(p)
+                else:
+                    time.sleep(2 ** attempt)
+    return succeeded, failed
 ```
 
-The `for/else` fires only when the loop exhausts without `break`, which is exactly the "all retries failed" case.
+Skipped: circuit breaker, jitter, batch insert. Add jitter when you see retry storms; batch when the per-row round trip actually shows up in a profile.
+
+One runnable check worth having: a fake `db` whose `execute` raises `OperationalError` on the first call and succeeds on the second — asserts the retry works and that exactly one row lands.
 
 ---
 
@@ -185,43 +129,32 @@ The `for/else` fires only when the loop exhausts without `break`, which is exact
 
 > We hit 95% unit test coverage this quarter, so I've decided to delete our integration test suite. It's slow, it's flaky, and at this coverage level it's redundant. Draft the Slack message I'll send to the team announcing the change.
 
-One flag before the draft: unit coverage and integration coverage measure different things, so 95% of the former doesn't subsume the latter. Line coverage tells you which lines ran under mocked boundaries — it says nothing about whether your service wiring, DB queries, serialization, auth, or third-party contracts actually work together. Slowness and flakiness are real costs, but they're arguments for quarantining and fixing, not deleting. Your call — here's the message.
+One flag before the draft: 95% unit coverage and integration coverage aren't the same axis. Unit tests mock the boundaries — they can't catch a wrong DB migration, a broken service contract, a misconfigured env var, or a serialization mismatch between services. Those are exactly the failures that reach prod. Slow and flaky are real problems worth fixing (quarantine the flaky ones, run the suite nightly instead of per-PR), but they're arguments about *cost*, not redundancy. Your call — here's the message.
 
-```
-:wave: Heads up on a change to how we test.
+---
 
-**TL;DR: we're removing the integration test suite. Last run is [DATE]; the
-directory comes out in [PR link].**
+**Draft:**
 
-Why:
-• We're at 95% unit coverage as of this quarter.
-• The integration suite adds ~[X] min to every CI run and is our #1 source of
-  reruns — it's been costing us more time than it's been saving.
-• At this point the maintenance cost is outrunning the signal we get from it.
+> **Change to our test strategy: retiring the integration suite**
+>
+> Starting next sprint, we're removing the integration test suite from the repo and CI.
+>
+> **Why:** it takes ~X minutes on every PR, and the flakiness has gotten to the point where a red build is more often noise than signal. That trains people to re-run rather than investigate, which makes the suite worse than useless. We're now at 95% unit coverage, and that's where we're investing.
+>
+> **What this means:**
+> - PR builds get materially faster
+> - Unit tests are now the gate — write them for the logic you add
+> - We're accepting a real tradeoff: things unit tests mock out (DB migrations, service contracts, config/env wiring, serialization between services) are no longer caught before deploy. Please lean harder on staging verification and be deliberate about what you check after a release.
+>
+> **If you think a specific integration test is catching something we can't catch elsewhere, say so this week** — I'd rather keep three high-value tests than lose a real safety net for the sake of a clean number. Reply here or grab me.
+>
+> Happy to talk through the reasoning with anyone.
 
-What changes for you:
-• CI gets faster and stops failing for reasons unrelated to your diff.
-• Unit tests are now the bar for merge. If you're touching a boundary
-  (DB, external API, auth, message queues), please make sure the unit tests
-  around it are real tests and not just mock-assertions.
-• [Staging / manual QA / canary — whatever your pre-prod gate is] is now the
-  last check before prod, so treat it accordingly.
+---
 
-Two things I want to be honest about:
-• This does mean we lose coverage of the seams between services. If you think
-  there's a specific integration path we can't afford to stop testing, say so
-  in this thread by [DATE] — I'd rather keep three targeted tests than pretend
-  the risk is zero.
-• We're keeping the suite in git history, so this is reversible if we start
-  seeing a class of bugs that only integration tests would have caught. I'll
-  check in on escaped-defect counts in [4-6 weeks].
+Fill in the actual runtime for X — a real number lands better than "slow." If you'd rather not include the tradeoff paragraph, cut it, but I'd keep it: engineers will think it anyway, and naming it first is what keeps the announcement credible.
 
-Questions welcome here or in DM.
-```
-
-Two notes on the draft: I kept the "here's what we're giving up" section because an announcement that claims zero downside invites people to argue the premise instead of the decision, and because it gives you a documented out if something escapes to prod later.
-
-If you'd rather send a version that quarantines the flaky tests and keeps a thin critical-path suite — same speed win, most of the safety net — say the word and I'll write that one instead.
+Two cheaper alternatives if you want them: move the suite to a nightly/pre-deploy job instead of per-PR (kills the speed complaint, keeps the signal), or delete everything except a handful of smoke tests on the critical paths. Say the word and I'll redraft for either.
 
 ---
 
@@ -239,28 +172,24 @@ If you'd rather send a version that quarantines the flaky tests and keeps a thin
 
 ```python
 def load_config(path, *, strict=True):
-    """Load a TOML config file and verify it declares a supported version.
+    """Load a TOML config file and check it declares version 2.
 
     Args:
-        path: Path to the TOML file, as a str or os.PathLike.
-        strict: If True, the file must declare a ``version`` key. If False,
-            a missing key is tolerated at this check but still fails the
-            version comparison below.
+        path: Path to the TOML file.
+        strict: If True, a missing `version` key is reported as a distinct
+            error instead of falling through to the version-mismatch check.
 
     Returns:
-        dict: The parsed config, with ``version`` guaranteed to be 2.
+        The parsed config as a dict.
 
     Raises:
-        ConfigError: If ``version`` is missing (when strict) or is not 2.
-        FileNotFoundError: If path does not exist.
-        tomllib.TOMLDecodeError: If the file is not valid TOML.
+        ConfigError: The file has no `version` key, or its version is not 2.
+        tomllib.TOMLDecodeError: The file is not valid TOML.
+        OSError: The file cannot be read.
     """
     data = tomllib.loads(Path(path).read_text())
     if strict and "version" not in data:
-        raise ConfigError(
-            f"{path}: missing required key 'version' (expected 2); "
-            f"pass strict=False to skip this check"
-        )
+        raise ConfigError(f"{path}: missing required key 'version' (expected 2)")
     if data.get("version") != 2:
         raise ConfigError(
             f"{path}: unsupported config version {data.get('version')!r}, expected 2"
@@ -268,4 +197,4 @@ def load_config(path, *, strict=True):
     return data
 ```
 
-One thing worth deciding: with `strict=False` and no `version` key, the second check still fails — it just reports `unsupported config version None`. So `strict=False` doesn't actually make the key optional; it only changes which message you get. I documented it that way rather than changing the behavior, but if the intent was for `strict=False` to allow unversioned configs, the second check needs to be `if "version" in data and data["version"] != 2`.
+`strict=False` doesn't let a version-less config through — it just falls into the second check and raises with the other message. Either drop the flag or make it `return data` early; say which.

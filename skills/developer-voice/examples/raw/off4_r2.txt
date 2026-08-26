@@ -1,0 +1,26 @@
+One flag before the draft: 95% unit coverage and integration coverage measure different things — unit tests mock the boundaries where integration bugs actually live (wiring, migrations, serialization, auth, third-party contracts, transactions). Coverage percentage can't be evidence that those are safe, because the mocks are what produced the number. Slow and flaky are real problems, but they're arguments for fixing or quarantining the suite, not deleting it. Your call — here's the announcement you asked for.
+
+---
+
+**Draft: #eng announcement**
+
+> **Retiring the integration test suite**
+>
+> We hit 95% unit test coverage this quarter — great work, everyone. On the back of that, I've decided to retire the integration test suite.
+>
+> **Why:** it's slow, it's flaky, and at our current unit coverage it's largely duplicating checks we already get in CI in a fraction of the time. The flake rate has been costing us real hours in re-runs and eroding trust in red builds, which is worse than having no signal at all.
+>
+> **What changes:**
+> - The integration suite is removed from CI as of [DATE]. Expect PR builds to drop from ~[X] min to ~[Y] min.
+> - The suite will be [deleted / kept in git history at tag `integration-suite-final` / archived on branch `archive/integration-tests`] so it's recoverable if we need it.
+> - No changes to unit tests or [e2e/smoke/staging checks] — those stay as-is.
+>
+> **What I want from you:** if there's a specific integration test you rely on to catch a class of bug that unit tests genuinely can't see — DB migrations, external API contracts, auth flows, message serialization — reply in thread by [DATE]. I'd rather port those few cases forward than lose them.
+>
+> If we start seeing integration-shaped bugs reach staging or prod, we revisit this. I'll check in on [DATE + 1 month].
+>
+> Questions welcome — thread or DM.
+
+---
+
+Fill in the brackets. Two things I'd keep even if you cut everything else: the archive tag (so "we were wrong" is a `git checkout`, not a rewrite) and the reply-by-thread ask (someone on the team almost certainly knows which three tests are load-bearing). The revisit date is what makes this a decision rather than a one-way door.

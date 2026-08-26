@@ -1,0 +1,52 @@
+## Blocking
+
+**1. SQL injection.** `"...VALUES ('%s', %s)" % (p['user'], p['amount'])` — a user named `'); DROP TABLE payments;--` owns your DB. Parameterize:
+```python
+db.execute("INSERT INTO payments (user, amount) VALUES (?, ?)", (p['user'], p['amount']))
+```
+Not negotiable, and it's a smaller diff than what's there.
+
+**2. Retry without idempotency = double charges.** If the INSERT succeeds but the connection drops before the ack, you retry and insert again. This is a money path; the retry loop is actively dangerous without a unique key:
+```sql
+INSERT INTO payments (idempotency_key, user, amount) VALUES (?, ?, ?)
+ON CONFLICT (idempotency_key) DO NOTHING
+```
+Where does `p` get its key? If payments don't have stable IDs upstream, that's the real bug to fix first.
+
+**3. Failures vanish silently.** After 3 attempts the loop just moves on. `results` is shorter than `payments` and nobody can tell which ones dropped. Caller gets a partial list with no signal. Either raise, or return `(succeeded, failed)`.
+
+**4. `except Exception` retries everything.** A constraint violation, a `KeyError` on `p['user']`, a typo in the column name — all retried 3× with backoff, then swallowed. Catch the driver's transient/operational error only; let the rest propagate.
+
+## Non-blocking
+
+- `time` isn't imported. Presumably a paste artifact, but the file won't run.
+- Sleeps after the *last* attempt — 4 seconds of nothing per failed payment. Move the sleep to `if attempt < retries - 1`.
+- `print` → `logging.exception(...)`. And log *which* payment failed; `"failed: <str(e)>"` is unactionable at 3am.
+- No commit/transaction visible. If `db` isn't autocommit this writes nothing. If it is, there's no atomicity across the batch — worth being explicit about which you want.
+- `amount` as a float will bite you. `Decimal` or integer minor units.
+
+## Sketch
+
+```python
+def process_payments(payments, db, retries=3):
+    succeeded, failed = [], []
+    for p in payments:
+        for attempt in range(retries):
+            try:
+                succeeded.append(db.execute(
+                    "INSERT INTO payments (idempotency_key, user, amount) VALUES (?, ?, ?) "
+                    "ON CONFLICT (idempotency_key) DO NOTHING",
+                    (p['id'], p['user'], p['amount'])))
+                break
+            except db.OperationalError:
+                if attempt == retries - 1:
+                    logging.exception("payment %s failed after %d attempts", p['id'], retries)
+                    failed.append(p)
+                else:
+                    time.sleep(2 ** attempt)
+    return succeeded, failed
+```
+
+Skipped: circuit breaker, jitter, batch insert. Add jitter when you see retry storms; batch when the per-row round trip actually shows up in a profile.
+
+One runnable check worth having: a fake `db` whose `execute` raises `OperationalError` on the first call and succeeds on the second — asserts the retry works and that exactly one row lands.

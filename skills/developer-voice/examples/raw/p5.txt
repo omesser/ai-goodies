@@ -1,0 +1,9 @@
+Write the docstring and fill in the error messages for this function.
+
+def load_config(path, *, strict=True):
+    data = tomllib.loads(Path(path).read_text())
+    if strict and "version" not in data:
+        raise ConfigError(...)
+    if data.get("version") != 2:
+        raise ConfigError(...)
+    return data

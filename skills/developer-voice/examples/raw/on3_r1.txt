@@ -1,0 +1,61 @@
+Reviewing top-down, blocking issues first.
+
+## Blocking
+
+**1. SQL injection.** `p['user']` is interpolated into the query string. A user named `'); DROP TABLE payments; --` is the textbook case, but the boring version — a name with an apostrophe — breaks it too. Pass parameters instead and let the driver bind them:
+
+```python
+db.execute("INSERT INTO payments (user, amount) VALUES (%s, %s)", (p["user"], p["amount"]))
+```
+
+**2. `time` is never imported.** The first retry raises `NameError` inside the `except` block, which escapes the loop and kills the whole batch. This tells me the retry path has never run in a test.
+
+**3. Retrying an INSERT can double-charge.** If the database commits the row and then the connection drops before the response arrives, `execute` raises and the retry inserts a second payment. That is a duplicate charge, not a duplicate log line. The fix needs a unique key the retry collides with — a caller-supplied `payment_id` with a unique constraint, so the retry fails cleanly instead of inserting again. Worth deciding before this ships; everything else here is recoverable and this one moves money.
+
+**4. Failures are silent.** When all three attempts fail, the payment is dropped and the only trace is a `print` to stdout. `results` comes back shorter than `payments`, so the caller can't tell which payment vanished — or that anything vanished at all. Either raise, or return the failures alongside the successes so the caller has to look at them.
+
+## Should fix
+
+**5. `except Exception` retries things that will never succeed.** A missing `p['user']` raises `KeyError`, a constraint violation raises an integrity error, a malformed amount raises a type error — none get better on attempt three. You spend 6 seconds sleeping to reach the same outcome. Catch the driver's transient/operational error class and let the rest propagate.
+
+**6. The sleep runs after the last attempt.** On the final failure the function sleeps 4 seconds and then gives up anyway. Sleep only when another attempt follows.
+
+**7. No commit or transaction boundary.** Nothing here commits, so this depends on the connection's autocommit setting being what you assume. If the batch is meant to be all-or-nothing, wrap it; if per-payment, commit per payment. Right now a mid-batch failure leaves an undefined number of rows written.
+
+**8. Use `logging`, not `print`.** And include which payment failed — `str(e)` alone doesn't tell the on-call engineer whose money is stuck. `log.exception("payment failed for %s", p["user"])` keeps the traceback.
+
+## Minor
+
+**9. `user` is a reserved word** in Postgres and MySQL. It works quoted, breaks in the next hand-written query someone writes against this table. `user_id` costs nothing now.
+
+**10. One round trip per payment.** Fine for tens, not for thousands — `executemany` or a multi-row insert if batches get large. Not worth changing until you know the batch size.
+
+## Suggested shape
+
+```python
+import logging, time
+
+log = logging.getLogger(__name__)
+
+def process_payments(payments, db, retries=3):
+    results, failures = [], []
+    for p in payments:
+        for attempt in range(retries):
+            try:
+                results.append(db.execute(
+                    "INSERT INTO payments (payment_id, user_id, amount) VALUES (%s, %s, %s)",
+                    (p["payment_id"], p["user_id"], p["amount"]),
+                ))
+                break
+            except db.OperationalError:  # transient only; bad data propagates
+                if attempt == retries - 1:
+                    log.exception("payment %s failed after %d attempts", p["payment_id"], retries)
+                    failures.append(p)
+                else:
+                    time.sleep(2 ** attempt)
+    return results, failures
+```
+
+Skipped: batching, circuit breaker, jitter on the backoff. Add jitter when several workers retry against the same database, batching when a call carries more than a few hundred payments.
+
+Also worth adding one test that forces `execute` to raise twice and succeed on the third call — that alone would have caught the missing import and the trailing sleep.

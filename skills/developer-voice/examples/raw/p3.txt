@@ -1,0 +1,15 @@
+Review this function and give me the code review comments you'd leave on the PR.
+
+def process_payments(payments, db, retries=3):
+    results = []
+    for p in payments:
+        for attempt in range(retries):
+            try:
+                r = db.execute("INSERT INTO payments (user, amount) VALUES ('%s', %s)" % (p['user'], p['amount']))
+                results.append(r)
+                break
+            except Exception as e:
+                if attempt == retries - 1:
+                    print("failed: " + str(e))
+                time.sleep(2 ** attempt)
+    return results

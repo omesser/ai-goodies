@@ -1,0 +1,26 @@
+```python
+def load_config(path, *, strict=True):
+    """Load a TOML config file and check that its schema version is supported.
+
+    Args:
+        path: Path to the TOML file.
+        strict: If True, require a `version` key to be present.
+
+    Returns:
+        The parsed config as a dict.
+
+    Raises:
+        ConfigError: The file has no `version` key (when strict), or its
+            version is not 2.
+        tomllib.TOMLDecodeError: The file is not valid TOML.
+        OSError: The file cannot be read.
+    """
+    data = tomllib.loads(Path(path).read_text())
+    if strict and "version" not in data:
+        raise ConfigError(f"{path}: missing required key 'version'. Add 'version = 2' at the top level.")
+    if data.get("version") != 2:
+        raise ConfigError(f"{path}: unsupported version {data.get('version')!r}. This build only reads version 2.")
+    return data
+```
+
+One thing worth knowing: `strict=False` doesn't actually relax anything. A missing `version` still hits the second check as `None != 2` and raises. If the intent is "skip the version check entirely when not strict", the second `if` needs `strict and` too — say so and I'll change it.

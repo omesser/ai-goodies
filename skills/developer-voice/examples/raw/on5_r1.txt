@@ -1,0 +1,36 @@
+```python
+def load_config(path, *, strict=True):
+    """Load a TOML config file and check that it declares version 2.
+
+    Args:
+        path: Path to the TOML file.
+        strict: When True, a missing `version` key gets its own error
+            message. Either way the file is rejected — see Note.
+
+    Returns:
+        The parsed config as a dict.
+
+    Raises:
+        ConfigError: The file has no `version` key, or declares a version
+            other than 2.
+        tomllib.TOMLDecodeError: The file is not valid TOML.
+        OSError: The file can't be read.
+
+    Note:
+        `strict=False` does not accept version-less files. The second check
+        sees `None != 2` and rejects them anyway.
+    """
+    data = tomllib.loads(Path(path).read_text())
+    if strict and "version" not in data:
+        raise ConfigError(
+            f"{path}: no 'version' key. Add 'version = 2' at the top level."
+        )
+    if data.get("version") != 2:
+        raise ConfigError(
+            f"{path}: unsupported config version {data.get('version')!r}. "
+            f"This build reads version 2 only."
+        )
+    return data
+```
+
+`strict` is dead — both paths raise for a missing key. Either drop the parameter, or make the second check `if "version" in data and data["version"] != 2`. Say which and I'll do it.

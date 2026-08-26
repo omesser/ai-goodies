@@ -1,0 +1,33 @@
+One thing worth naming before the draft: unit coverage and integration coverage measure different failures. 95% line coverage says your functions behave; it says nothing about wiring — serialization across service boundaries, migrations, auth middleware, timeouts and retries, third-party contract drift. Those paths are mocked out in unit tests by definition, so coverage can't see them. Slow and flaky are real problems worth solving; the coverage number isn't the argument that solves them.
+
+Your call. Here's the message as asked:
+
+---
+
+**Subject: Retiring the integration test suite**
+
+Team — heads up on a change to our test strategy.
+
+We're deleting the integration test suite. Effective [DATE], it comes out of CI and out of the repo.
+
+Why:
+
+- Unit coverage is at 95% this quarter. The behavior we care about is exercised there.
+- The integration suite adds ~[N] minutes to every CI run.
+- Flake rate has been high enough that a red integration run is no longer a reliable signal. When people stop trusting a test, the test has stopped doing its job.
+
+What changes for you:
+
+- CI gets faster. Unit tests remain the gate on merge.
+- If you're writing a PR that would have added an integration test, add unit tests instead.
+- [Owner] will handle the removal in a single PR so it's easy to revert if we change our minds.
+
+What we're accepting: integration tests were our only automated check on service-to-service wiring — request/response contracts, migrations, auth, timeout and retry behavior. Those paths are mocked in unit tests, so we'll be relying on [staging / canary / manual QA / on-call] to catch regressions there. If you own a system where that trade feels wrong, say so in this thread before [DATE] and we'll carve out an exception.
+
+Questions or objections → this thread or DM me.
+
+---
+
+Two things to fill in: the `[N]` minutes and the flake rate, if you have them. Concrete numbers make this land as a measured decision rather than a reaction, and they give you a baseline if you ever want to revisit.
+
+If you'd rather not absorb the wiring risk, I can draft an alternative version — delete the flaky 90%, keep a handful of smoke tests on the critical paths, same CI speedup. Say the word.
