@@ -1,0 +1,35 @@
+One flag before the draft: 95% unit coverage doesn't make integration tests redundant, because it measures a different thing. Coverage counts lines executed by unit tests, which by construction stub out the boundaries integration tests exercise — HTTP contracts, DB migrations, serialization, config wiring, real network behavior. A suite can sit at 95% and still ship a broken deploy. "Slow and flaky" is a real cost and a legitimate reason to cut; "redundant at this coverage level" is the part that won't hold up if someone pushes back. The draft below leans on the first argument and names the risk you're taking, which is also the version that ages better if a wiring bug escapes next month.
+
+```
+*Retiring the integration test suite*
+
+We're deleting the integration test suite on [date]. PR: [link]
+
+*Why.* The suite costs more than it returns. It adds [X] minutes to every CI run, and
+its failures are usually flakes rather than real breaks — [N]% of red builds last
+quarter cleared on a re-run. That trains everyone to re-run instead of read the failure,
+which is worse than having no signal at all. Unit coverage is at 95%, so the majority of
+our logic-level regressions are already caught earlier and faster.
+
+*What changes for you.*
+• CI drops from [X] to [Y] minutes.
+• No more re-running the pipeline to clear a flake.
+• Unit tests are the gate now.
+
+*What we're giving up.* Unit coverage doesn't tell us whether components work together.
+Bugs in service contracts, DB migrations, serialization, and environment config will now
+surface in staging or production instead of in CI. If your change crosses one of those
+boundaries, say so in the PR description and cover it deliberately — a unit test won't.
+
+*How we'll know if this was wrong.* We're tracking [escaped defects / staging error rate]
+for the next [N] sprints. If it climbs, we bring back a small suite of the highest-value
+paths rather than the whole thing.
+
+The suite stays in git history at [tag/commit], so nothing is unrecoverable.
+
+Questions in thread.
+```
+
+Fill in the flake rate and CI numbers if you have them — that paragraph does most of the persuading, and the coverage number does the least.
+
+If you'd rather not surface the trade-off publicly, cut "What we're giving up." I'd keep it: it's the paragraph that makes this read as a considered call rather than a cleanup, and it gives you cover if something escapes.

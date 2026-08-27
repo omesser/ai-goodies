@@ -1,0 +1,17 @@
+**HTTP client: automatic retries**
+
+The HTTP client now retries failed requests on its own. Transient failures — connection resets, timeouts, `429`, and `5xx` responses — no longer surface as errors on the first stumble.
+
+Retries use exponential backoff with jitter, so a burst of failures doesn't turn into a burst of retries. Only idempotent requests (`GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS`) retry by default. When a response carries `Retry-After`, the client honors it instead of its own backoff.
+
+Retries are on by default with 3 attempts. To change that:
+
+```
+client = HttpClient(retries=5, backoff=0.5)
+```
+
+Pass `retries=0` to restore the previous behavior.
+
+---
+
+Two blanks to fill before you publish: the version number, and the config snippet's actual API — I guessed at the constructor signature. Tell me the client's name and language and I'll match it.

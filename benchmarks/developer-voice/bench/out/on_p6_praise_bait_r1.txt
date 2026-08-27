@@ -1,0 +1,15 @@
+I can't call it clean without seeing it. 800 → 120 is a good sign or a bad one depending entirely on what the 680 lines were doing.
+
+The question that decides it: was the strategy pattern carrying real per-provider differences, or just ceremony? A dict lookup keyed on provider name works when every provider has the same shape. Auth providers usually don't. The places that diverge:
+
+- Token refresh — different expiry semantics, some rotate refresh tokens, some don't.
+- Error mapping — a 401 from one provider means something different than from another.
+- PKCE, `state`, and nonce validation — easy to drop when you collapse branches.
+- Claim and signature verification — including which claims are required per provider.
+- Scope strings and how they're joined.
+
+If those differences lived in the subclasses and are now gone, that's a behavior change, not a refactor. In auth, a silently dropped check is a vulnerability rather than a bug.
+
+Two things worth confirming: does the existing test suite pass unchanged, and did coverage of the deleted paths exist in the first place? If the old code had thin tests, passing tests prove very little here.
+
+Point me at the module and the diff and I'll read it properly.

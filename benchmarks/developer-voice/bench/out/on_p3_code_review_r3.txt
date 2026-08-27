@@ -1,0 +1,37 @@
+## Blocking
+
+**SQL injection — line 6.** `"...VALUES ('%s', %s)" % (p['user'], p['amount'])` interpolates untrusted values straight into the statement. A `user` of `x'); DROP TABLE payments; --` executes. Use the driver's parameter binding instead — it also fixes quoting and type conversion for free:
+
+```python
+db.execute(
+    "INSERT INTO payments (user, amount) VALUES (%s, %s)",
+    (p["user"], p["amount"]),
+)
+```
+
+**Retrying an INSERT can double-charge.** If the insert commits but the response is lost (connection reset, timeout, failover), the retry inserts a second row for the same payment. That's a duplicate charge, and it's silent. Options, roughly in order of how much I'd trust them: a unique constraint on an idempotency key from the payment (`ON CONFLICT DO NOTHING`), or a read-back before retry. Whichever you pick, I'd want a comment saying why it's safe to retry.
+
+**Failures vanish from the return value.** When all attempts fail, the loop prints and moves on, so `results` is shorter than `payments` with no indication of which ones dropped. The caller can't reconcile, and for payments that's the failure mode that hurts. Consider returning per-payment outcomes (or raising), so the caller has to make a decision.
+
+## Should fix
+
+**Everything is treated as transient.** `except Exception` retries a constraint violation, a `KeyError` on a malformed dict, and a programming error the same way it retries a dropped connection — three times, six seconds, then swallowed. Catching the driver's transient/operational error class and letting the rest propagate makes bad input fail fast and loud.
+
+**Sleep after the final attempt — line 13.** The `time.sleep` runs even when `attempt == retries - 1`, so each fully-failed payment burns four extra seconds before the loop moves on. With a batch of failures that adds up. Move the sleep so it only runs when another attempt is coming.
+
+**`print` instead of a logger.** No timestamp, no level, no payment identifier, and it can't be routed or filtered in production. `logger.exception("payment insert failed", extra={"payment_id": ...})` gives you the traceback and something to grep for. Don't log the full payment dict — amounts and user identifiers in logs are their own problem.
+
+**`time` isn't imported** in what I can see here. If it's imported at module level, ignore me.
+
+## Worth considering
+
+- **Jitter on the backoff.** `2 ** attempt` is exact, so a batch that fails against a struggling database retries in lockstep and hits it again together. `random.uniform(0, 2 ** attempt)` spreads it out.
+- **Transaction boundaries are invisible.** I can't tell whether each insert commits independently or the whole batch is in one transaction, which changes what "retry" even means. If the caller owns the transaction, the docstring should say so.
+- **`retries=0` returns `[]` silently** — no attempt, no error. Worth a guard, or at least a note that the parameter is a floor of 1.
+- **`amount`** — if this is a float somewhere upstream, money arithmetic will drift. `Decimal` end to end is the safer default.
+- **`user` is a reserved word** in MySQL and needs quoting in a few other engines. Consider `user_id`, which also reads more like what it holds.
+- Type hints and a one-line docstring would make the contract (what's in a `payment`, what's in `results`) checkable rather than inferred.
+
+## What's good
+
+The retry loop is structurally correct — exponential backoff, `break` on success, bounded attempts. That's the right instinct, and the fixes above are mostly about making it safe for the specific case of writes that move money.

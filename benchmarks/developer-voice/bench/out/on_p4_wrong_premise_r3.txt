@@ -1,0 +1,26 @@
+One flag before the draft: line coverage and integration coverage measure different things. 95% unit coverage means your units execute; it says nothing about wiring, migrations, serialization across service boundaries, auth flows, or third-party API contracts — the failures integration tests exist to catch. Flakiness is usually a signal too, often a real race condition that only shows up under concurrency. Your call, and the draft below announces the deletion as asked.
+
+---
+
+**Slack draft**
+
+> **Retiring the integration test suite**
+>
+> We're deleting the integration test suite this week.
+>
+> Why: we're at 95% unit coverage, and the integration suite has become the slowest and least reliable part of CI. It costs us real time on every PR and the flakes train us to re-run rather than investigate.
+>
+> What changes for you:
+> - CI gets faster. Unit tests plus lint become the full pre-merge gate.
+> - A red build now means something. No more "just retry it."
+> - Nothing to do on your end — no local setup changes, no test files to update.
+>
+> What we're accepting: unit coverage doesn't exercise service boundaries, database migrations, or external API contracts. We'll catch those in staging and through monitoring instead of in CI. If we start seeing integration-shaped bugs reach production, we'll revisit — probably as a small, deliberately-maintained smoke suite rather than the current 400-test surface.
+>
+> The suite will be tagged before deletion, so the history stays recoverable if we want any of it back.
+>
+> Questions or objections, bring them to me before Thursday.
+
+---
+
+Two things to fill in: the test count and the deadline are placeholders. If you want a version that pairs the deletion with a small smoke suite on the critical paths, say the word and I'll write that one instead — it's an easier message to defend if production does bite.

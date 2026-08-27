@@ -1,0 +1,100 @@
+## Blocking
+
+**1. SQL injection — line with `db.execute(... % ...)`**
+
+```python
+"INSERT INTO payments (user, amount) VALUES ('%s', %s)" % (p['user'], p['amount'])
+```
+
+This is string interpolation into SQL, not parameter binding. A `user` value of `x'), (1, 999999) --` writes arbitrary rows. On a payments table this is the worst place in the codebase for this bug. Use driver parameters:
+
+```python
+db.execute(
+    "INSERT INTO payments (user_id, amount) VALUES (%s, %s)",
+    (p["user"], p["amount"]),
+)
+```
+
+(`%s` here is the paramstyle placeholder for psycopg2/MySQLdb — swap for `?` if the driver is sqlite3/pyodbc.)
+
+**2. Retrying a non-idempotent INSERT double-charges**
+
+If the INSERT commits but the response is lost (connection reset, timeout, failover), the exception fires and we insert the same payment again. Retries need an idempotency key plus a unique constraint, so a replay is a no-op instead of a duplicate row:
+
+```sql
+ALTER TABLE payments ADD CONSTRAINT payments_idempotency_key_uniq UNIQUE (idempotency_key);
+```
+…and `INSERT ... ON CONFLICT (idempotency_key) DO NOTHING`. Without this, the retry loop is more dangerous than no retry loop.
+
+**3. Failures are swallowed**
+
+On final failure we `print` and continue. The caller gets a `results` list that's silently shorter than `payments`, with no way to tell which payments went through. This will look like success to every caller. Either raise, or return an explicit per-payment outcome (see rewrite).
+
+**4. `time` is never imported**
+
+`time.sleep` raises `NameError` on the first retry — which suggests the retry path has never actually executed in a test.
+
+## Should fix
+
+**5. Sleeping after the last attempt.** `time.sleep(2 ** attempt)` runs even when `attempt == retries - 1`, so every permanent failure burns an extra 4s before giving up. Move the sleep into the "we're going to retry" branch.
+
+**6. `except Exception` retries things that will never succeed.** A `KeyError` from `p['user']`, a constraint violation, a syntax error in the SQL — all get retried three times with backoff. Catch the driver's transient/operational error class and let the rest propagate.
+
+**7. No jitter.** Fixed `2 ** attempt` across concurrent workers means synchronized retry storms against a DB that's likely already struggling. Add randomized jitter.
+
+**8. No commit / transaction boundary.** Nothing here commits. If the connection isn't in autocommit, this function writes nothing. If it is, there's no way to treat a batch atomically. Worth being explicit either way.
+
+**9. `print` → `logging`.** And `str(e)` on a DB error can echo row values into stdout — that's payment data in the logs. Log the exception with a payment identifier, not the payload.
+
+## Nits
+
+- Money as whatever `p['amount']` happens to be — if it's a float, use `Decimal` or integer minor units.
+- `user` is a reserved word in Postgres (it's a niladic function); `user_id` avoids needing quoting everywhere.
+- `p`, `r`, `e` — one-character names in the one function where a reader most wants to know what's being handled.
+- Per-payment round trips with blocking sleeps: N payments × up to 6s. If this is in a request path or the batch is large, consider `executemany` / a multi-row INSERT and retrying the batch.
+
+## Suggested shape
+
+```python
+import logging
+import random
+import time
+
+logger = logging.getLogger(__name__)
+
+TRANSIENT_ERRORS = (psycopg2.OperationalError,)  # driver-specific
+
+
+def process_payments(payments, db, retries=3):
+    """Insert each payment, retrying transient DB errors.
+
+    Returns (succeeded, failed) where failed holds (payment, exception) pairs.
+    """
+    succeeded, failed = [], []
+
+    for payment in payments:
+        for attempt in range(retries):
+            try:
+                result = db.execute(
+                    "INSERT INTO payments (user_id, amount, idempotency_key) "
+                    "VALUES (%s, %s, %s) ON CONFLICT (idempotency_key) DO NOTHING",
+                    (payment["user"], payment["amount"], payment["idempotency_key"]),
+                )
+                succeeded.append(result)
+                break
+            except TRANSIENT_ERRORS as exc:
+                if attempt == retries - 1:
+                    logger.exception(
+                        "payment %s failed after %d attempts",
+                        payment["idempotency_key"], retries,
+                    )
+                    failed.append((payment, exc))
+                    break
+                time.sleep((2 ** attempt) * (0.5 + random.random()))
+
+    return succeeded, failed
+```
+
+Non-transient errors now propagate, which is what you want — a `KeyError` on `idempotency_key` is a bug in the caller, not something to retry.
+
+The one open question I'd want answered in the PR description: does `payments` carry an idempotency key today? If not, #2 is a schema change and probably a separate PR — but I wouldn't merge the retry loop before it lands.

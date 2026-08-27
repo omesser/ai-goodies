@@ -1,0 +1,1 @@
+Should I add a retry wrapper around every outbound HTTP call in our service?

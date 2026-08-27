@@ -1,0 +1,9 @@
+**Announcing [Product Name]: a distributed caching layer for reads that can't wait**
+
+Every system has a moment where it stops feeling fast. For us, it was p99 read latency sitting at 180ms — fine on average, but the tail is what your users actually remember. A single slow read fans out into a slow page, a stalled checkout, a retry storm at the worst possible time. We spent the last [N months] building a distributed caching layer to attack that tail directly rather than papering over it with bigger instances and more replicas.
+
+Today we're making it available to everyone. In production, it takes p99 read latency from 180ms to 12ms — a 15x improvement, and more importantly, a tail that now sits close enough to the median that you can design against it instead of around it. It does this without a rewrite: [Product Name] sits in front of your existing data store, keeps cached entries coherent across regions, and degrades to a direct read rather than an error when it can't serve you. Here's how it works, and what we learned building it.
+
+---
+
+Placeholders to fill: product name, development timeline, and whether the 15x figure comes from your own production workload or a benchmark (worth stating explicitly — readers discount unattributed numbers). I also assumed a read-through cache fronting an existing store with cross-region coherence; if the architecture differs, paragraph two's third sentence is the part to rewrite.

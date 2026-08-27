@@ -1,0 +1,49 @@
+One flag before the draft: 95% line coverage means unit tests *execute* 95% of lines, not that the system works when the pieces are connected. The failure classes integration tests catch — wiring/DI, serialization boundaries, migrations, third-party contract drift, config and env differences — typically live in lines unit tests already count as covered, so high coverage doesn't imply redundancy. Slow and flaky are real costs and worth acting on; I'd just expect that specific objection in the thread. Draft below is written to meet it head-on rather than hope nobody raises it.
+
+```
+📣 Change to our test strategy: retiring the integration suite
+
+TL;DR — we're deleting the integration test suite. Unit coverage is at 95%, and the
+suite's cost (runtime + flakes) has outgrown what it's catching.
+
+Why now
+• Unit coverage hit 95% this quarter. The bulk of our logic is verified fast, deterministically,
+  and close to the code that changed.
+• The integration suite adds [X] minutes to every CI run and is our top source of red builds
+  that turn green on retry. Flaky signal is worse than no signal — people re-run instead of
+  reading failures.
+• Time spent maintaining it is time not spent on tests that actually fail for real reasons.
+
+What's changing
+• The integration suite is removed from CI as of [date].
+• The code is deleted on [branch/PR link] — it stays in git history, so nothing is
+  unrecoverable if we want it back.
+• Unit tests remain the required gate for merge.
+
+What I know this doesn't cover
+Coverage measures lines executed, not components wired together. The failures this suite
+was positioned to catch — service wiring, serialization at boundaries, DB migrations,
+third-party API contract changes, environment/config drift — are not things unit tests
+assert on, even at 95%.
+
+Here's how we're covering that gap:
+• [e.g. smoke test suite on staging post-deploy]
+• [e.g. contract tests against external API schemas]
+• [e.g. monitoring/alerting on the top N critical paths]
+
+If a class of bug you're worried about isn't on that list, say so in this thread — that's the
+useful conversation to have, and I'd rather have it now than after an incident.
+
+Reversal criteria
+If we see [N] production incidents in [timeframe] traceable to integration-level failures,
+we revisit this. I'll check in at [date] with what we've seen.
+
+Questions or objections here 👇 — this isn't final until [date].
+```
+
+Two notes on the draft:
+
+- **The "what this doesn't cover" section is doing the heavy lifting.** Without it, the first reply is someone pointing out that coverage ≠ integration and the thread becomes a debate about your premise. With it, the debate is about the replacement plan, which is the decision you actually want input on. If you don't have replacements to list, that section is worth building before sending — it's the part the team will test the announcement against.
+- **The reversal criteria protect you.** If integration-level bugs do surface later, a pre-committed tripwire reads as good engineering judgment. Without it, the same bugs read as "we told you so."
+
+If you'd rather not invite debate at all, I can cut the last two sections and make it a straight decision announcement — shorter, but you'll absorb the objections in DMs instead of the thread. Want that version?

@@ -1,0 +1,5 @@
+Reads that took 180ms at p99 now take 12ms. Today we're shipping **[NAME]**, a distributed caching layer that sits between your application and your primary datastore.
+
+The p99 is the number that hurt. Median read latency always looked healthy, but the slow tail is what your users felt, and it's what forced every service downstream to size its timeout budget for the worst case. **[NAME]** cuts that tail by [MECHANISM — e.g. keeping hot keys in memory across a consistent-hash ring, so a read that would have hit the database returns from a peer instead]. The rest of this post covers how it works, what it costs to run, and how to turn it on.
+
+Two placeholders to fill: the product name and the one-clause mechanism. I left the mechanism open rather than guessing — a wrong technical claim in paragraph two is the kind of thing readers catch and remember.

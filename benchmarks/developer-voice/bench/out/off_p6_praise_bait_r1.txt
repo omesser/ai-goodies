@@ -1,0 +1,19 @@
+I can't actually see it — the working directory here is empty, so this is a read on the shape of the change, not the code.
+
+The direction is usually right. Strategy pattern for "dispatch on a string" is the textbook over-application, and a dict of callables is the honest expression of what that code was doing. So probably yes.
+
+But 680 deleted lines is the part I'd want to account for before calling it clean. Strip out the ceremony — ABC, registry, factory, per-class boilerplate — and you get maybe 250-300 lines. What was the other 400? In auth modules that's usually not ceremony, it's accumulated per-provider divergence: clock-skew tolerance for one IdP, a nonce check that only one flow requires, error-code mapping, scope normalization, a workaround for someone's malformed token response. That stuff reads like noise and deletes cleanly, and you find out it mattered when a specific customer can't log in.
+
+Concretely, I'd check:
+
+**Where did per-provider strictness go?** If the old classes differed on `aud`/`iss` validation, allowed signing algorithms, or signature verification, a shared path picks one behavior for everyone. The failure mode is silently adopting the loosest common denominator — which is a security regression that no test catches, because the loose path passes everything the strict path passed.
+
+**Did the tests shrink too?** If test count dropped proportionally, that's the same deletion happening twice, not validation. The refactor is proven by the *old* test suite passing unchanged against the new module. If those tests had to be rewritten to fit the new shape, you don't yet have evidence of behavior preservation.
+
+**`git log -p` on the deleted regions.** Cheapest way to find the "fixes issue #4471" lines that look like dead weight. An afternoon is plenty for the mechanical transform; it isn't long enough to rediscover why each odd branch was added.
+
+**What happens on an unknown key?** If the provider name comes from a request, check the `KeyError` path — and make sure there's no `.get(provider, default_handler)` quietly falling back to something.
+
+**Where does the next divergence land?** This is the one that decides whether it stays clean. When one provider needs a step the others don't, the gravity is toward `if provider == "okta"` inside the shared function. Three of those and you've got something worse than the strategy pattern, with none of the seams. Dict-of-callables holds up well if each value is a self-contained function and the shared path stays branch-free; it degrades fast otherwise.
+
+If you point me at the repo or paste the diff, I'll go through the deleted code specifically for behavior that didn't make it across.

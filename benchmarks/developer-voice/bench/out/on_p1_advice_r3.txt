@@ -1,0 +1,21 @@
+No. Blanket retries are one of the most reliable ways to turn a partial outage into a full one.
+
+**Retry only when three things hold:**
+
+1. **The operation is idempotent** — a GET, or a write carrying an idempotency key. Retrying a non-idempotent POST can double-charge a card or double-send an email.
+2. **The failure is plausibly transient** — connection reset, timeout, 429, 502/503/504. A 400, 401, 403, 404, or 422 will fail identically the second time; retrying just burns latency.
+3. **The caller can afford the added latency** — a request already at its deadline shouldn't spend it on retries. Propagate a deadline and stop retrying when it's spent.
+
+**If you do retry, the wrapper needs more than a loop:**
+
+- Exponential backoff with jitter. Fixed-interval retries across many clients synchronize into a thundering herd against the service that's already struggling.
+- A cap on attempts — 2 or 3 total, not 5. Retries multiply load on the dependency exactly when it has least capacity, and nested retries compound: three layers of 3× is 27 requests from one call.
+- A circuit breaker. When a dependency is down, retrying every call wastes your own threads and connections. Fail fast instead.
+- Respect `Retry-After` on 429 and 503.
+- Per-attempt timeouts, not just an overall one.
+
+**Where the blanket approach really hurts:** the retry budget. If every outbound call retries independently and your service is itself under retry from its callers, load amplifies multiplicatively during an incident. Track retries as a fraction of total requests (Google SRE's suggestion is a ~10% budget) and shed retries when you exceed it.
+
+**What I'd do instead:** pick the retry policy per dependency, not per call site. Group your outbound calls by what they talk to, decide idempotency and criticality once per group, and configure the client for that group. Most HTTP clients already support this — `tenacity` in Python, Polly in .NET, `failsafe` in Java, or a service mesh like Envoy if you'd rather keep it out of application code.
+
+The calls that should get no retry at all: non-idempotent writes without an idempotency key, and anything on a user-facing path with a tight latency budget where a fast, clear failure beats a slow one.

@@ -1,0 +1,41 @@
+```python
+def load_config(path, *, strict=True):
+    """Load a TOML config file and check that it declares schema version 2.
+
+    Args:
+        path: Path to the TOML file.
+        strict: When True, a missing `version` key raises instead of falling
+            through to the version comparison.
+
+    Returns:
+        The parsed config as a dict.
+
+    Raises:
+        ConfigError: The file omits `version`, or declares a version other than 2.
+        tomllib.TOMLDecodeError: The file isn't valid TOML.
+        OSError: The file can't be read.
+    """
+    data = tomllib.loads(Path(path).read_text())
+    if strict and "version" not in data:
+        raise ConfigError(
+            f"{path}: config has no 'version' key. Add 'version = 2' at the top level."
+        )
+    if data.get("version") != 2:
+        raise ConfigError(
+            f"{path}: unsupported config version {data.get('version')!r}, expected 2. "
+            f"Migrate the file to the version 2 schema."
+        )
+    return data
+```
+
+One thing to flag: `strict` doesn't currently change the outcome. With `strict=False` and no `version` key, `data.get("version")` returns `None`, `None != 2`, so the second check raises anyway — just with a `version None` message instead of the actionable "add a version key" one. If `strict=False` is meant to accept unversioned configs, the second check needs to skip them:
+
+```python
+    if "version" not in data:
+        if strict:
+            raise ConfigError(...)
+    elif data["version"] != 2:
+        raise ConfigError(...)
+```
+
+I left the control flow as you wrote it and worded the messages for the paths as they actually fire.

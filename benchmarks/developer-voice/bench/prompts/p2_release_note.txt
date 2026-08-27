@@ -1,0 +1,1 @@
+Write a short release note announcing that our HTTP client now supports automatic retries.

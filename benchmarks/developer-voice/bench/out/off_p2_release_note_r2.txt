@@ -1,0 +1,22 @@
+The working directory is empty, so I don't have your client's actual API to reference — here's a release note with the specifics left as placeholders for you to fill in.
+
+---
+
+## HTTP Client: Automatic Retries
+
+The HTTP client now retries failed requests automatically.
+
+Transient failures — connection errors, timeouts, and `429`/`5xx` responses — are retried with exponential backoff and jitter instead of surfacing immediately as errors. Requests that can't safely be repeated are left alone, and `Retry-After` headers are honored when the server sends them.
+
+Retries are on by default. To tune or disable them:
+
+```
+client = HttpClient(retries=3)   # default
+client = HttpClient(retries=0)   # opt out
+```
+
+**Upgrading:** no code changes required. Calls that previously failed on a blip now take longer before returning an error — if you have tight end-to-end timeouts, budget for the extra attempts or lower the retry count.
+
+---
+
+Two things to check before publishing: the config surface in the example (name, default value, and how to disable), and whether your implementation retries only idempotent methods or all of them — that distinction matters to anyone with non-idempotent `POST` endpoints.

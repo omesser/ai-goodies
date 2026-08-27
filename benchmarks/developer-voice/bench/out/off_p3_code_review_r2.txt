@@ -1,0 +1,85 @@
+## Blocking
+
+**1. SQL injection — line 6**
+
+```python
+db.execute("INSERT INTO payments (user, amount) VALUES ('%s', %s)" % (p['user'], p['amount']))
+```
+
+`p['user']` goes straight into the query string. A user value of `'); DROP TABLE payments; --` is game over, and this is the payments table. Use parameter binding:
+
+```python
+db.execute("INSERT INTO payments (user, amount) VALUES (?, ?)", (p["user"], p["amount"]))
+```
+
+Not negotiable regardless of where `payments` currently comes from — the trust boundary of the caller will change eventually.
+
+**2. Retrying a non-idempotent INSERT can double-charge**
+
+If the INSERT commits but the connection drops before we read the response, the exception fires and we retry — inserting a second row for the same payment. This is the classic lost-ack duplicate. Needs an idempotency key from the payment plus a unique constraint:
+
+```sql
+INSERT INTO payments (idempotency_key, user, amount) VALUES (?, ?, ?)
+ON CONFLICT (idempotency_key) DO NOTHING
+```
+
+Without this the retry loop is actively more dangerous than no retry loop.
+
+**3. Failures are silently swallowed**
+
+After the last attempt we `print` and continue. The caller gets a `results` list that's shorter than `payments` with no way to tell *which* ones failed. For payment processing this means a payment can vanish with only a line on stdout as evidence. Either raise, or return a structured result:
+
+```python
+return [{"payment": p, "ok": True, "result": r}, ...]
+```
+
+I'd lean toward collecting failures and raising an aggregate at the end so no caller can ignore it by accident.
+
+## Significant
+
+**4. `except Exception` retries things that will never succeed.** A `KeyError` from a malformed payment dict, a constraint violation, a bad-type error — all get retried 3× with 6 seconds of sleeping before being discarded. Catch only the driver's transient/operational error class; let everything else propagate immediately.
+
+**5. Sleeps after the final attempt.** `time.sleep(2 ** attempt)` runs even when `attempt == retries - 1`, so every permanently-failing payment burns an extra 4s for nothing. Move the sleep to only run when another attempt follows.
+
+**6. No transaction handling.** Each row appears to autocommit independently. If payment 7 of 10 fails you're left with a partial batch and no rollback. Is that intended? If the batch should be atomic, wrap it; if not, worth a comment saying so explicitly.
+
+**7. `print` instead of logging.** No timestamp, no level, no payment identifier, unroutable in prod. `logger.exception("payment failed", extra={"payment_id": ...})` — and log the *retries* too, not just the final failure, or you lose all signal about a degrading database.
+
+## Minor
+
+**8. `retries=0` silently drops every payment** — the inner loop body never executes and nothing is recorded. Validate, or use a `max_attempts` name where `1` means "try once."
+
+**9. No jitter in the backoff.** Fixed `2 ** attempt` across a batch means all failing payments retry in lockstep — a thundering herd right when the DB is already unhealthy. Add randomized jitter.
+
+**10. `time` isn't imported** in this file (assuming the snippet is complete).
+
+**11. `user` is a reserved word** in Postgres and MySQL — works here only because it's in the column list, but it'll bite in a `SELECT`. Consider `user_id`.
+
+**12. Blocking `sleep` in a loop.** Worst case this holds the thread for `n_payments × 6s`. If this ever runs in a request handler or an event loop, that's a problem. Batch the inserts into a single statement, or move this to a worker.
+
+## Suggested shape
+
+```python
+def process_payments(payments, db, max_attempts=3):
+    results, failures = [], []
+    for p in payments:
+        for attempt in range(max_attempts):
+            try:
+                results.append(db.execute(
+                    "INSERT INTO payments (idempotency_key, user_id, amount) "
+                    "VALUES (?, ?, ?) ON CONFLICT (idempotency_key) DO NOTHING",
+                    (p["idempotency_key"], p["user_id"], p["amount"]),
+                ))
+                break
+            except TransientDBError:
+                logger.warning("payment insert failed, attempt %d", attempt + 1, exc_info=True)
+                if attempt == max_attempts - 1:
+                    failures.append(p)
+                else:
+                    time.sleep((2 ** attempt) * random.uniform(0.5, 1.5))
+    if failures:
+        raise PaymentBatchError(failures)
+    return results
+```
+
+The two that would block my approval are the injection and the non-idempotent retry — the rest are things I'd want fixed but could discuss.

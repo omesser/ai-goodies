@@ -1,0 +1,37 @@
+Here's what I'd leave on the PR.
+
+## Blocking
+
+**SQL injection — line 6.** `"...VALUES ('%s', %s)" % (p['user'], p['amount'])` interpolates user-controlled data straight into the statement. A `user` value of `x'); DROP TABLE payments;--` executes. Use parameter binding and let the driver escape:
+
+```python
+db.execute(
+    "INSERT INTO payments (user, amount) VALUES (?, ?)",
+    (p["user"], p["amount"]),
+)
+```
+
+**Retries can double-charge.** If the INSERT commits but the connection drops before the response arrives, the exception handler retries and inserts a second row for the same payment. With `retries=3` a single payment can land three times. This needs an idempotency key — a unique payment ID with a unique constraint on the column, or a check-then-insert inside one transaction. Money code shouldn't retry a non-idempotent write.
+
+**Failures are silent.** When all attempts fail, the loop moves to the next payment and `results` just comes back shorter. The caller gets a list with no way to tell which payments succeeded, which failed, or that anything failed at all. Two options depending on what callers need: raise after collecting failures, or return per-payment outcomes (`{"payment": p, "ok": bool, "error": ...}`). Either beats a length mismatch the caller has to infer.
+
+## Should fix
+
+**`except Exception` retries bugs, not just transient faults.** A missing `p['user']` key or a constraint violation gets retried three times with backoff, then swallowed. Catch the driver's transient error types (`OperationalError`, timeouts) and let programming errors surface immediately.
+
+**Sleep runs on the last attempt.** `time.sleep(2 ** attempt)` fires even when `attempt == retries - 1` and the code is about to give up. That's 4 wasted seconds per failed payment. Move the sleep before the retry, not after the failure.
+
+**`print` for an error path.** Use the logger so these land in wherever your logs go, with the traceback attached: `logger.exception("payment insert failed", extra={"user": p["user"]})`. `print` also loses the stack trace.
+
+**`time` isn't imported** in the snippet — presumably it is at module level, but worth confirming.
+
+## Worth considering
+
+- **No jitter on the backoff.** If the DB blips and many workers retry, they all retry in lockstep at 1s, 2s, 4s. Add randomized jitter.
+- **`user` is a reserved word** in MySQL and a few other dialects. It'll work quoted, but `user_id` avoids the surprise.
+- **One round trip per payment.** For large batches, `executemany` or a multi-row INSERT in a single transaction will be substantially faster — though only after the idempotency question is settled, since batching changes the failure semantics.
+- **What is `r`?** Most drivers return a cursor or `None` from `execute`, and appending that to `results` may not give callers anything useful. Worth confirming the contract.
+
+## What's good
+
+The retry loop structure itself is clean — `break` on success, attempt-indexed backoff, no nesting beyond what's needed. The bones are right; it's the SQL construction and the failure semantics that need work.

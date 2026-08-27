@@ -1,0 +1,25 @@
+Empty working directory, so this is written from generic assumptions — swap the version number, defaults, and option names for your real ones.
+
+```markdown
+## HTTP client: automatic retries
+
+The HTTP client now retries failed requests on its own.
+
+Retries apply to connection errors, timeouts, and the 429, 502, 503, and 504 status
+codes. Requests are retried up to 3 times with exponential backoff and jitter. If the
+server sends a `Retry-After` header, the client waits for that long instead.
+
+Only idempotent methods (`GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS`, `TRACE`) are
+retried by default, so a `POST` that reached the server is never sent twice.
+
+Retries are on by default. No code change is needed to get them. To tune the
+behavior, pass a retry policy when you build the client:
+
+```python
+client = HttpClient(retries=Retry(max_attempts=5, backoff_factor=0.5))
+```
+
+To turn retries off, pass `retries=None`.
+```
+
+Tell me the language, version number, and actual option names and I'll adjust it.

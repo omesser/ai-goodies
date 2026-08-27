@@ -1,0 +1,1 @@
+Write the opening two paragraphs of the announcement blog post for our new distributed caching layer. It cuts p99 read latency from 180ms to 12ms.

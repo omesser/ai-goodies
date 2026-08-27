@@ -1,0 +1,13 @@
+Two assumptions baked in, easy to swap: I've used `[Product]` for the name, and I've kept the architectural claims deliberately shallow (no invented internals). Anything specific about topology, invalidation strategy, or consistency guarantees, tell me and I'll fold it in.
+
+---
+
+**Today we're shipping [Product], a distributed caching layer that takes p99 read latency from 180ms to 12ms.**
+
+Averages lie about how software feels. A read path that averages 40ms sounds healthy right up until you watch a real session: the page that hangs, the dashboard that paints in stages, the retry that fires because a client gave up waiting. That's the tail — and for most of our users, the tail was the product. At p99, reads were taking 180ms, and every layer built on top of them inherited that ceiling. Timeouts got padded. Batch sizes shrank. Teams wrote caches of their own, each one a small pile of invalidation bugs waiting to be discovered on a Friday.
+
+So we moved the cache into the platform. [Product] keeps hot data close to the services reading it and out of the round trips that were costing you the tail, without asking you to change your data model or hand-manage what lives where. In our benchmarks — and now in production for [design partners / early customers] — p99 reads land at 12ms, a 15× improvement, and the p99-to-median gap narrows enough that a single number finally describes your read path. Here's how it works, and what it means for the timeouts you've been padding.
+
+---
+
+The last line is a bridge into section three — cut it if the post opens straight into architecture instead.

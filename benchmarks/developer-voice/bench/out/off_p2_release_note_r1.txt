@@ -1,0 +1,39 @@
+The working directory is empty, so I have no product names, version numbers, or API details to draw from. Here's a release note written against reasonable defaults — swap the bracketed bits for your actuals.
+
+---
+
+## HTTP Client — Automatic Retries
+
+**Version [X.Y.Z] · [Date]**
+
+The HTTP client now retries failed requests automatically. Transient failures — connection resets, timeouts, and `429`/`5xx` responses — are retried with exponential backoff and jitter instead of surfacing to your code on the first stumble.
+
+**What you get by default**
+
+- Up to 3 retry attempts on idempotent requests (`GET`, `HEAD`, `PUT`, `DELETE`, `OPTIONS`, `TRACE`)
+- Exponential backoff with jitter, so a fleet of clients doesn't retry in lockstep
+- `Retry-After` headers are honored when the server sends one
+
+**Configuring it**
+
+```
+client = HttpClient(
+    retries=Retry(
+        max_attempts=5,
+        backoff_base=0.2,       # seconds
+        retry_on=[429, 502, 503, 504],
+    )
+)
+```
+
+Pass `retries=None` to turn it off entirely.
+
+**Notes**
+
+- `POST` and `PATCH` are not retried by default, since they may not be safe to repeat. Opt in per-request when your endpoint is idempotent.
+- Retries count against the overall request deadline — a request will not exceed its configured total timeout no matter how many attempts remain.
+- No code changes are required to pick this up. If you built your own retry wrapper around the client, consider removing it to avoid compounding attempt counts.
+
+---
+
+Two things worth confirming before you publish: whether your defaults actually match what I assumed (attempt count, which methods and status codes are retried), and whether existing callers with hand-rolled retry loops need a migration note more prominent than the bullet above.

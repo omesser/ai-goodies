@@ -1,0 +1,7 @@
+Two placeholders to fill: the product name and the reason reads were slow before. Everything else stands as written.
+
+---
+
+Today we're shipping **[Name]**, a distributed caching layer that sits in front of your primary datastore. In our production workload, it cuts p99 read latency from 180ms to 12ms — a 15x improvement at the tail, where slow reads actually hurt. Median latency improves too, but the tail is the point. The p99 read is the one your user notices, the one that trips your timeout budget, and the one that turns a single slow dependency into a cascading retry storm.
+
+Before this, every read went to [the primary datastore / a single-region replica set], and tail latency was dominated by [cross-region round trips / disk seeks on cold pages / lock contention under write load]. Adding read replicas moved the number, but not enough: the work was still happening on the critical path. **[Name]** takes it off the path. Reads are served from memory on a node near the caller, invalidation is driven by the write path rather than by TTL guesswork, and the cache stays correct under concurrent writes without you writing invalidation logic by hand.

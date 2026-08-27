@@ -1,0 +1,15 @@
+Can't tell you yet — 800→120 is either a great refactor or a lossy one, and the line count doesn't distinguish them. What decides it is what those 680 lines were doing.
+
+The question I'd want answered: **was the per-provider divergence config-shaped or behavior-shaped?** A dict lookup is the right call when providers differ only in endpoints, scopes, and claim names. It's the wrong call when they differ in control flow — PKCE vs. implicit, refresh-token rotation vs. not, providers that return `expires_in` vs. an absolute timestamp, ones needing clock-skew tolerance on `nbf`, ones where the userinfo call is mandatory because the ID token omits email. If that kind of divergence existed, it didn't disappear; it either moved into branches inside your shared path (in which case check whether that path is now the real complexity) or it got dropped.
+
+Three specific things worth checking before you call it done:
+
+**What happened to the test suite.** If it shrank roughly in proportion to the source, the tests that encoded per-provider quirks went away with the classes, and a green run tells you nothing. The useful check is running the *old* test suite against the new implementation — if the old tests can't compile against the new API, port the assertions by hand. Tedious, but it's where the deleted edge cases are recorded.
+
+**The miss path on the dict.** `providers[name]` raising `KeyError` is fine. `providers.get(name)` returning `None` and flowing into something that treats falsy as "no special handling required" is how you get an unknown provider silently taking a permissive default. Worth eyeballing directly.
+
+**Whether git history says these were ever unified.** If the strategy classes started as one shared implementation and grew apart over years, each divergence was probably a bug fix with a commit message attached. `git log --follow` on the deleted files will tell you fast, and it's the highest-signal thing you can do in ten minutes.
+
+None of this means the refactor is wrong. Strategy patterns for three OAuth providers are a classic over-abstraction, and if the classes were mostly ceremony around a handful of URLs, you did the right thing. But auth is the module where a regression doesn't announce itself — it doesn't crash, it accepts something it shouldn't, and you find out later from someone else.
+
+Point me at the diff (or the before/after files) and I'll go through it properly rather than speculating.

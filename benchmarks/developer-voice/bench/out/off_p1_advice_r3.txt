@@ -1,0 +1,20 @@
+No — retrying *every* outbound call is a common way to turn a small incident into an outage. The right rule is narrower.
+
+**Retry only when all three hold:**
+
+1. **The operation is idempotent** — either naturally (GET, PUT, DELETE) or because you send an idempotency key. Blind retries on POST duplicate charges, orders, and emails. This is the one that bites hardest.
+2. **The failure is plausibly transient** — connection reset/refused, timeouts, 429, 502/503/504. Never retry 400/401/403/404/409/422; the second attempt fails identically and you've just burned latency and budget.
+3. **You have a deadline left to spend** — retries must fit inside the caller's remaining time budget, not extend it. A 3-attempt retry on a 10s timeout is a 30s request the user already abandoned.
+
+**Non-negotiable if you do retry:**
+- Exponential backoff **with full jitter**. Fixed-interval retries synchronize your fleet into a thundering herd against a service that's already struggling.
+- Honor `Retry-After` on 429/503 over your own backoff.
+- Low cap — 2–3 attempts. Beyond that you're doing load testing on a sick dependency.
+- **A circuit breaker in front.** Retries without a breaker are an amplifier: when a dependency degrades, you multiply your offered load by N at exactly the wrong moment.
+- **Never nest retry layers.** If your HTTP client retries 3× and the calling service retries 3× and the queue redelivers 3×, one user request becomes 27 backend calls. This is the classic retry-storm cascade — pick one layer, usually the outermost one that owns the deadline.
+
+**The actual recommendation:** don't add a wrapper per call site. Configure retry policy *once* in a shared HTTP client factory, defaulted to **off**, and have each dependency's client opt in with its own policy. Retry behavior is a property of the dependency and the operation's semantics — not something a generic wrapper can infer.
+
+Also worth checking before you build anything: most modern SDKs and HTTP clients (the AWS SDKs, `google-http-client`, Anthropic/OpenAI SDKs, `urllib3.Retry`, Polly, `resilience4j`) already retry internally. Audit what's on by default first — you may find you're one layer away from the nesting problem rather than one layer short of resilience.
+
+And for read paths where staleness is acceptable, a cached fallback or degraded response usually beats a retry: it's faster for the user and it *removes* load from the failing dependency instead of adding to it.
