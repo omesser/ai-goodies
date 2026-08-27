@@ -7,10 +7,22 @@ The skill is `disable-model-invocation: true`, so the agent never fires it on it
 deliberate: an agent that switches its own register mid-task is unpredictable in exactly the
 way a voice skill is supposed to prevent. You decide when the register changes.
 
-To see what it does to output before installing, read the
-[benchmark](../../benchmarks/developer-voice/) — seven prompts answered with the skill off and
-on, with the harness that produced them. It lives outside the skill so it isn't installed
-alongside it.
+## Measured effect
+
+Seven prompts, two arms, three repetitions — 42 sessions with every other plugin disabled.
+
+| Prose words, 21 runs per arm | Baseline | Voice |
+|---|---|---|
+| Total | 6735 | **5234 (−22%)** |
+
+Shorter on 7 of 7 prompts, from −9% to −49%. Run-to-run spread narrowed on 6 of 7.
+
+What it did **not** show: flattery and marketing register never appeared in the baseline, and
+minimizer counts came out even, so the substitutions table went unexercised. The measured gain
+is length, not word choice.
+
+Method, caveats, and transcripts: [`benchmarks/developer-voice/`](../../benchmarks/developer-voice/).
+It sits outside the skill folder so it isn't installed alongside it.
 
 ## Install first
 
