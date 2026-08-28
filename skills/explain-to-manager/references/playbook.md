@@ -62,6 +62,10 @@ Pattern: validate where it did help (quantified) → name what it can't absorb �
 Pattern: never bare "nothing"; offer the scope-cut menu.
 > "Not the full thing credibly. By <date> I can give you <reduced scope> — that covers <the business need it still serves>. The rest lands <date>. Want me to write up the trade-off so you can choose?"
 
+**"This is the third time. Why should I believe this date?"**
+Pattern: concede the pattern in one sentence → what makes this estimate different in kind → say the padding out loud → cadence. Never offer the fourth date with more confidence than the third.
+> "Fair. The first two came from work I hadn't done yet; this one is built from <what has since been proven — work now finished, or the specific thing that was mis-sized and is now known>. It's also the conservative version — my optimistic date was <earlier date>, and I'm not giving you that one. If it moves, you'll hear it the week I know."
+
 **"How sure are you about the new date?"**
 Pattern: stated confidence → the one risk that moves it → when that risk resolves → cadence.
 > "About 80%. The one thing that moves it is <risk>, and I'll know by <day>. You'll hear from me every Friday either way — and immediately if that risk fires."
