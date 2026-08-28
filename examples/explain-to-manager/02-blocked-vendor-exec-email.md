@@ -1,259 +1,240 @@
-# Example 2 — The launch that holds for 80% of customers
+# Example 2 — The four accounts that can't launch on the 15th
 
 | | |
 |---|---|
 | **Shape** | Reset |
-| **Gap type** | Iceberg (hidden complexity — scale), with dependency drag as a live secondary |
-| **Audience** | COO — skip-level, non-technical, forwards everything to the CEO |
-| **Format** | Email she can forward, unedited |
+| **Gap type** | 1 (iceberg — scale), with 4 (dependency drag) as the secondary that earns its own ask |
+| **Audience** | COO — skip-level, non-technical, forwards everything she gets to the CEO |
+| **Format** | Email she forwards, capped at ~120 words by the skip-level/exec calibration |
 | **Time pressure** | Sync in one hour — Phase 1 compressed to the ★ questions |
 
 ## Scenario
 
-A data platform engineer owns a customer-facing analytics dashboard. The COO expects a full
-launch on Oct 15 and marketing has a post queued. The dashboard is genuinely live and correct,
-but the largest beta account carries 40x the data anything was ever tested against, and its
-pages take 9 seconds against a 2-second bar. Part of the fix is gated on a vendor flag. The
-engineer has one hour and needs an email the COO can forward to the CEO verbatim.
+A data platform engineer owns a customer-facing analytics dashboard that the COO expects to launch
+Oct 15, with a marketing post already written. The dashboard is live and correct, but the largest
+beta account arrived with 40 times the data anything was tested against, and its queries take 9
+seconds against a 2-second bar. Part of the fix sits behind a vendor setting nobody at the vendor
+has answered in 9 days. The engineer has one hour before a sync with the COO.
+
+---
 
 ## The session
 
 **Engineer:**
-
 > Our COO is expecting the analytics dashboard to launch Oct 15 and marketing has a post ready.
 > It's not going to be all customers on the 15th. I have a sync with her in an hour. She is not
 > technical and whatever I write she will forward to the CEO.
 
-**Skill — Phase 0, intake (no questions needed; all four answers were in the opening):**
-
-Recorded from what the engineer already said, rather than asked back:
-
-- **Format:** an email, written to be forwarded — not talking points.
-- **Audience:** skip-level, non-technical, and a relay to the CEO. That selects the hardest
-  calibration in the table: ~120-word cap, zero mechanism, every sentence written on the
-  assumption it will be pasted upward with no edits.
-- **Timing:** one hour. Phase 1 compresses to the ★ questions only.
-- **Shape:** Reset. An existing expectation (Oct 15, all customers) will not hold as stated.
-
-**Skill — Phase 1, round 1 (★ questions from A, B, C):**
-
-1. What exactly does the COO believe today — "Oct 15, all customers, dashboard fully live"? And
-   has she already committed that date to anyone outside the company?
-2. What works end-to-end right now that you could show her without hand-holding?
-3. What specifically do you now know that nobody knew when Oct 15 was set?
-
-**Engineer:**
-
-1. She believes Oct 15 is the full launch and marketing has a post ready to go with it. I don't
-   know what the post actually says, and I don't know whether the CEO has quoted Oct 15 anywhere.
-2. The dashboard has been live since Sept 2 — 12 internal users and 3 beta customers on it. The
-   numbers reconcile against finance to the dollar. That part I'd demo to anyone.
-3. The largest beta account has roughly 40x the data of anything we'd previously tested against.
-   Its p95 query is 9 seconds. Our bar is 2 seconds.
-
-**Skill — Phase 1, round 2 (pushing on "it's not going to be all customers" — the opening's
-vaguest phrase — plus ★ E):**
-
-You opened with "not all customers." That's the sentence that will get you the question you
-least want. Which customers, as a share, and what is the actual boundary?
-
-And two more: what is the fix, and what date would you bet your weekend on for everyone?
+**Skill — Phase 0, intake:**
+> Your message settles all four intake questions, so I'm not going to spend your hour asking them
+> back:
+>
+> - **Shape:** reset. An existing expectation about existing work is about to change.
+> - **Audience:** skip-level, non-technical, and she forwards. That is the strictest calibration in
+>   the skill — zero mechanism, hard cap around 120 words, and I write assuming every sentence gets
+>   pasted upward verbatim.
+> - **Format:** an email. Not talking points — the artifact has to survive being forwarded without
+>   you in the room.
+> - **Time:** one hour, so I'm compressing the interview to the starred questions and adding only
+>   what the final checklist can't do without.
+>
+> Four questions, then a second round.
+>
+> 1. What exactly does she believe is happening on Oct 15 — all customers, some, a soft launch?
+> 2. What works end-to-end today that you could show her right now with no hand-holding?
+> 3. What did you find out that wasn't known when Oct 15 was set?
+> 4. How public is Oct 15 already? Has she or the CEO put that date in front of anyone outside the
+>    company?
 
 **Engineer:**
+> 1. All customers, everyone at once, with the marketing post going out the same day.
+> 2. It's been live since Sept 2 — 12 internal users and 3 beta customers using it daily. The
+>    numbers are verified against finance to the dollar.
+> 3. The largest beta account has about 40 times the data of anything we'd tested before. Its p95
+>    query takes 9 seconds. Our bar is 2 seconds.
+> 4. I don't know. I don't know what the marketing post actually says, and I don't know whether the
+>    CEO has quoted Oct 15 anywhere.
 
-Accounts under 10 million rows are already fast today — that is about 80% of customers, and
-Oct 15 holds for them fine. The fix for the rest is pre-computed aggregate tables. That's 2.5
-weeks of plain engineering work, not research. Weekend-bet date for all customers is Nov 5.
-
-But there's a second thing. The aggregation feature I need is behind a flag only our
-data-warehouse vendor can turn on for our tier. Ticket's been open 9 days and all I've gotten is
-an auto-reply. There is an account exec the COO could ping.
-
-**Skill — Phase 1, round 3 (consequence, alternatives, and the ask — still ★-adjacent, three
-questions because the email needs a decision in it):**
-
-1. Concretely, what does the COO's customer see if those big accounts go live on the 15th anyway?
-2. Was there a cheaper or faster alternative you ruled out? She will ask "can't we just buy our
-   way out of this."
-3. What do you actually need from her in this sync — a decision, an escalation, or both?
-
-**Engineer:**
-
-1. A spinner on every page load. And those are the four largest accounts by revenue — the ones
-   most likely to get quoted as reference customers in the marketing post.
-2. Yes. Buying bigger warehouse capacity takes 9 seconds down to about 5. Still over the
-   2-second bar, and it costs real money every month. Pre-computing gets us under 2 with no
-   ongoing cost.
-3. Both. A decision on tiered vs. single launch, and the vendor escalation.
-
-**Skill — Phase 1, one loose end:**
-
-Why did this surface now and not in August?
+**Skill:**
+> Holding both of those unknowns — I'll route them at the end rather than guess, and neither one
+> changes the engineering picture.
+>
+> "40 times the data" is the whole story, so I want the shape of the fix and the shape of the
+> alternative you already rejected.
+>
+> 5. What's the actual fix, and is it engineering or research?
+> 6. What date would you bet your weekend on for all customers? Not the date you think she wants.
+> 7. What faster route have you already ruled out, and what does it miss? "Can't we buy our way out
+>    of this?" is the first thing she'll ask.
+> 8. Is anything blocking you right now, and since when?
 
 **Engineer:**
+> 5. Pre-computed aggregate tables. 2.5 weeks. It's plain engineering work, not research — I know
+>    how to do it.
+> 6. Nov 5 for all customers. That's the one I'd bet a weekend on.
+> 7. Buying bigger warehouse capacity. It takes the 9 seconds to about 5. Still over the 2-second
+>    bar, and it costs real money every month. Pre-computing gets under 2 with no ongoing cost.
+> 8. Yes. The aggregation feature I need is behind a flag only the data-warehouse vendor can enable
+>    on our tier. Ticket's been open 9 days and all I've gotten is an auto-reply. There's an account
+>    exec the COO could ping.
 
-The 40x account joined beta on Sept 2. Before that, no data of that size existed anywhere for us
-to test against.
+**Skill:**
+> That last answer is half the brief, and the compressed interview would have missed it — none of
+> the starred questions ask what's blocking. Three more, then I write.
+>
+> 9. What happens if the big accounts launch on the 15th anyway?
+> 10. Is there any customer segment Oct 15 does hold for?
+> 11. What do you actually need from her — a decision, the escalation, or both?
 
-**Skill — Phase 1, close:**
+**Engineer:**
+> 9. A spinner on every page load. And those are the four largest accounts by revenue — the ones
+>    most likely to be named in the marketing post as reference customers.
+> 10. Yes. Accounts under 10 million rows are already fast. That's about 80% of customers. Oct 15
+>     holds for them.
+> 11. Both. A decision on tiered versus single launch, and the vendor escalation.
 
-That closes it. Every Phase 4 checklist item is answerable from the above. Two things stay
-open and I will not fill them in: what the marketing post says, and whether the CEO has quoted
-Oct 15 publicly. Those are hers to check, and the brief will say so rather than assume either way.
+**Skill — Phase 1 close, routing the two unknowns:**
+> I have everything the Phase 4 checklist needs. Before I draft, the two "I don't know" answers.
+>
+> The skill's rule is that I never close a gap myself — I drop it, hand it to the manager, or hand
+> you a check to run first. You have an hour, so running down what the marketing post says isn't
+> realistic. Both unknowns are hers: she owns the announcement and she is the one who talks to the
+> CEO. So they go to her.
+>
+> But not in the email. She forwards the email to the CEO, and "has the CEO quoted Oct 15 anywhere?"
+> reads very differently when the CEO is the one reading it. Ask both in the sync, out loud; the
+> email carries only what survives forwarding. That split isn't something the skill tells me to do —
+> it follows from the audience calibration, and I'm flagging it as a judgment call rather than a
+> rule.
 
 **Skill — Phase 2, gap diagnosis:**
+> **Dominant: gap type 1, iceberg.** She believes the dashboard works because the dashboard does
+> work — she's seen it, it's been live for a month, the numbers tie to finance. What's invisible to
+> her is that "works" was only ever measured against data 40 times smaller than what the biggest
+> customer brought.
+>
+> **Secondary: gap type 4, dependency drag.** The skill says to name the second type only when it
+> changes the plan. It changes the plan here: it's the reason there are two asks instead of one. So
+> the vendor gets one clause and no blame — elapsed days and a named path forward, nothing about
+> them ignoring you.
+>
+> No analogy. At ~120 words an analogy costs a fifth of the budget, and "40 times the data" is
+> already the plainest sentence in the brief.
 
-**Dominant: #1 Iceberg.** The COO's belief is grounded in something real — the dashboard is
-live, it has users, the numbers are right. The visible part is genuinely done. The remaining
-work is scale, which is the invisible majority the gap type names, and it was always going to
-be the majority for the biggest accounts.
-
-**Secondary: #4 Dependency drag** — and it earns a mention, because it changes the plan. The
-Nov 5 date has exactly one external risk, the vendor flag, and the COO is the person who can
-act on it. The skill says mention a second gap type only when it changes the plan. It does here:
-it is one of the two asks.
-
-**Analogy: none.** Skip-level, 120 words, and "the pages take 9 seconds against a 2-second bar"
-is already plain. An analogy inside a 120-word exec email spends words the decision needs, and
-to a COO it reads as talking down.
-
-**Skill — Phase 3, translation decisions (recorded because two of them were judgment calls):**
-
-- "p95 query time" → "pages take 9 seconds." p95 is mechanism; the COO cannot act on a
-  percentile.
-- "Pre-computed aggregate tables" → deleted entirely. She is not choosing the technique, and
-  naming it invites a question the email has no room to answer.
-- "The vendor is sitting on our ticket" → "has held a required ticket 9 days." Fact, elapsed
-  time, no blame. Rule 6.
-- Every number ships with a denominator: 80% *of customers*, 10 million rows *as the boundary*,
-  9 seconds *against a 2-second bar*, four accounts *largest by revenue*.
-- **Judgment call 1 — the upward line.** The skill wants a quotable sentence for the manager to
-  forward. This email *is* the forward. A separate "if it's useful upward" block would be a
-  message-within-a-message and would cost ~15 of 120 words. Instead the first sentence was
-  written as the upward line, and the engineer is told that outside the email.
-- **Judgment call 2 — two anchors.** The Phase 4 checklist wants exactly one primary date. A
-  tiered launch has two by construction. Both were kept; the subject line carries both so the
-  CEO gets the shape from the preview pane alone.
-
-**Skill — Phase 4:** deliverables below.
+---
 
 ## Deliverables
 
-### 1. The headline (≤25 words)
+### 1. Headline (21 words)
 
-> Analytics dashboard launches Oct 15 for about 80% of customers; the four largest accounts
-> need until Nov 5, and one vendor nudge from you protects that date.
-
-24 words.
+> Oct 15 launches on schedule for about 80% of customers; our four largest accounts land Nov 5. Two
+> decisions for you.
 
 ### 2. The email
 
-**Word count: 126 words in the body** (122 excluding the "[COO] —" salutation and the two list
-numerals), against the skill's ~120 cap for skip-level/exec output. Subject line not counted.
+> **Subject: Analytics dashboard — Oct 15 for most customers, Nov 5 for the largest four**
+>
+> [COO],
+>
+> Oct 15 holds for about 80% of customers. The dashboard has been live since Sept 2 for 3 beta
+> customers, with every figure reconciled to finance to the dollar.
+>
+> The exception is our four largest accounts by revenue. One joined the beta Sept 2 with 40 times
+> the data we had ever tested, and its pages take 9 seconds against a 2-second bar. Launching those
+> four Oct 15 hands our best reference customers a spinner on every page. Pre-computed tables fix it
+> in 2.5 weeks — Nov 5, a date I would bet my weekend on.
+>
+> Two things from you: approve the tiered launch, and ping our warehouse vendor's account exec — a
+> setting only they can enable has sat 9 days without a human reply.
+>
+> Next update Oct 3, or the day the vendor replies.
 
-> **Subject: Analytics dashboard — Oct 15 for ~80% of customers, Nov 5 for the largest four**
->
-> [COO] —
->
-> Oct 15 holds for about 80% of customers — every account under 10 million rows is fast today,
-> verified against finance to the dollar.
->
-> Our four largest accounts by revenue need until Nov 5. One joined beta Sept 2 with 40x our
-> tested data volume; its pages take 9 seconds against a 2-second bar. Launching them Oct 15
-> puts a spinner on every page load for the accounts marketing is most likely to quote.
->
-> Two things from you:
->
-> 1. Tiered launch Oct 15, or hold everyone to Nov 5?
-> 2. Our warehouse vendor has held a required ticket 9 days; a note to our account exec is the
->    one thing that moves Nov 5.
->
-> Next update Friday, or same day if the vendor moves.
+**Body word count: 136** (`wc -w`, counting everything after the salutation; two of those tokens are
+standalone em dashes, so 134 words of prose). The cap is ~120. See the notes below — the skill's cut
+order had nothing left to cut.
 
-**Note to the engineer, not part of the email:** the first sentence is your upward line. If the
-CEO reads nothing else, that sentence is the one you want him to have. Do not add a separate
-"here's what to tell the CEO" section — she is forwarding this whole thing.
+**What the cut order removed, in the skill's stated sequence:**
 
-**Also not part of the email, say it out loud in the sync:** you don't know what the marketing
-post says, and you don't know whether Oct 15 has been quoted externally. Both are hers to check
-before she answers question 1. Don't guess at either in writing.
+- Analogy — cut first, per the rule. Saved nothing; there wasn't one.
+- Separate "if it's useful upward" line — cut, because she forwards this email itself. Its first
+  sentence is the upward line.
+- Next-update line — kept. The rule only permits cutting it when the manager does *not* forward.
 
 ### 3. Hard-questions prep
 
-**"Can't we just launch everyone on the 15th?"**
-> We can. Those four accounts get a spinner on every page load, and they're the largest by
-> revenue and the most likely names in the post. That's the trade — it's a business call, not a
-> technical one, which is why it's your decision and not mine.
+**"Can't we just buy more capacity?"**
+> Tried that math. Bigger warehouse capacity takes the slowest pages from 9 seconds to about 5 —
+> still over our 2-second bar, and it's a bill we'd pay every month forever. Pre-computing gets us
+> under 2 seconds with no ongoing cost. It's 2.5 weeks of ordinary engineering, not research.
 
-**"Can't we buy our way out of it?"**
-> I checked. Bigger warehouse capacity takes 9 seconds to about 5 — still over our 2-second
-> bar, and it's a real monthly cost forever. Pre-computing gets us under 2 with no ongoing
-> cost. Paying more doesn't buy the date.
+**"Can't we launch everyone on the 15th and fix it after?"**
+> We can. The four accounts that would be slow are our four largest by revenue, and they're the ones
+> most likely to be named in the post as reference customers. Their people would see a spinner on
+> every page load, in the same week we invite press to look.
 
-**"Why am I hearing this two weeks out?"**
-> The account that exposed it joined beta on Sept 2. Before that, no data at that size existed
-> for us to test against — we weren't ignoring it, we couldn't see it. You'll get a Friday line
-> from me through launch so nothing else lands late.
+**"Why am I only hearing this now?"**
+> The account with 40 times the data joined the beta Sept 2. No data at that size existed anywhere
+> in our system before then. The problem arrived with the customer, and you're hearing it the same
+> week it became measurable.
 
-**"How confident are you in Nov 5?"**
-> The 2.5 weeks of work is ordinary engineering, not research — I'd bet my weekend on it. The
-> single variable is the vendor flag. That's why it's ask number two.
+**"How sure are you about Nov 5?"**
+> Sure enough to bet a weekend on it. It's 2.5 weeks of work I know how to do. The one thing that
+> moves it is the vendor setting — that's why the escalation is half my ask.
 
-**"What can I announce on the 15th?"**
-> A launch, honestly. About 80% of customers get the dashboard, fast, with numbers that
-> reconcile to the dollar. What I can't tell you is whether the post names the four accounts
-> that aren't in that wave — that's worth checking before it goes out.
+**"What exactly do the other 80% get on the 15th?"**
+> The full dashboard, fast, with numbers reconciled to finance to the dollar. Same product our beta
+> customers have been using since Sept 2. Nothing is held back from them.
 
 ### 4. Personal do-not-say list
 
-| Likely to blurt | Say instead |
+| You're likely to say | Say instead |
 |---|---|
-| "It's not going to be all customers on the 15th." (your own opening line — it leads with the hole and invites "so which ones?") | "Oct 15 holds for about 80% of customers. The four largest need until Nov 5." |
-| "The vendor's been ignoring us for nine days." | "Our ticket has been open 9 days. A note to our account exec is the fastest unblock." |
-| "It's slow for the big accounts." | "9 seconds against our 2-second bar." |
-| "It turned out to be way more data than we expected." | "An account with 40x our tested volume joined beta Sept 2. That's what we now know." |
-| "Hopefully we can still get everyone in on the 15th." | Nothing. Don't offer a date you won't bet a weekend on. Nov 5 is the date. |
+| "It's not going to be all customers on the 15th." | "Oct 15 holds for about 80% of customers. The largest four land Nov 5." |
+| "The vendor is ignoring us." | "A setting only the vendor can enable has been open 9 days. Your account exec is the fastest path." |
+| "It's a scaling problem." | "One account has 40 times the data we'd ever tested against." |
+| "We could probably make it if we throw money at capacity." | "More capacity takes 9 seconds to about 5 — still over the bar, and it's a monthly bill." |
+| "Sorry, I should have caught this sooner." | "The account that exposed this joined the beta Sept 2. No data that size existed before then." |
 
-### 5. The promised Friday follow-up (skeleton)
+### 5. The promised follow-up (offered)
 
-> **Subject: Dashboard — Friday update**
+Skeleton for Oct 3, so the cadence promise in the email actually gets kept:
+
+> **Analytics dashboard — Oct 3 check-in**
 >
-> Oct 15 wave: [on track / changed, and why].
-> Nov 5 wave: aggregate work [N of 3 stages done].
-> Vendor flag: [enabled on <date> / still open, <N> days, escalation status].
-> Nothing needed from you this week. / One thing: [ask].
+> - Oct 15 broad launch: on track / at risk because ___
+> - Pre-computed tables: ___ of the four accounts under 2 seconds
+> - Vendor: replied / still silent — ___ days open
+> - Nov 5: still the date / moved to ___ because ___
 
-Fill it in and send it even on the weeks where nothing moved. The empty ones are what make the
-non-empty ones believed.
+---
 
 ## What this run shows
 
-- **The interview earned the email.** The engineer's opening contained one number: Oct 15. The
-  email contains eight, and every one came from a ★ question. The single most valuable answer —
-  "about 80% of customers are already fast" — arrived only because the skill pushed back on the
-  vague phrase "not all customers" instead of writing around it.
-- **The ~120-word exec cap is genuinely tight against the checklist.** Two dates, two asks, a
-  denominator, the risk that moves the date, a cadence, and a forwardable opening do not fit
-  comfortably. The output landed at 126 and something had to be cut: the standalone "if it's
-  useful upward" block. That was arguably the right cut here — the email *is* the forward — but
-  the skill offers no guidance for the case where the manager forwards the artifact itself, and
-  a less careful run would either blow the cap or drop the cadence line instead.
-- **The "exactly one primary anchor" check does not survive a tiered launch.** Oct 15 and Nov 5
-  are both primary, and collapsing to one would misrepresent the situation. The skill's Phase 4
-  checklist needs a tiered/partial-launch case, or the check reads as violated on a correct brief.
-- **The reset shape has no ★ for alternatives ruled out.** "Can't we just buy bigger hardware?"
-  is the first question any COO asks, and the answer (9s → ~5s, still over bar, ongoing cost)
-  was the strongest item in the hard-questions prep. It surfaced only because round 3 went
-  looking for it. The proposal shape has P3 for exactly this; the reset shape's dimension E
-  ("options with trade-offs") points at scope cuts, not at technical alternatives already
-  eliminated.
-- **Phase 4 has no slot for what the engineer doesn't know.** Two material unknowns — the
-  contents of the marketing post, and whether Oct 15 has been quoted externally — bear directly
-  on the decision being asked for. They ended up in an improvised "not part of the email" note.
-  A standing deliverable item ("what the manager must check that you can't") would have caught
-  them by construction rather than by luck.
-- **Compressing to ★ dropped dimension D entirely** (is this the first reset? were early
-  warnings given?). Nobody asked, so the brief cannot know whether this lands cold or as the
-  third slip — which would change the tone materially. Under one-hour pressure that may be an
-  acceptable loss, but the skill compresses silently; it should say which dimension it is
-  giving up.
+- **The ★ set alone would have produced the wrong brief.** None of the five starred reset questions
+  asks what's blocking, or what the engineer needs from the manager. The vendor flag — half the
+  email's ask — surfaced only because the Phase 4 checklist requires an explicit ask and I went back
+  for it. The compression rule and the stopping condition ("stop when you can answer every checklist
+  item") point in opposite directions, and the checklist has to win.
+
+- **The ~120-word exec cap did not fit this brief.** It landed at 136. The skill's cut order was
+  followed and returned nothing: there was no analogy to cut, the separate upward line was already
+  folded into the first sentence, and the next-update line is protected because she forwards. Two
+  dates, two asks, a rejected alternative, and a denominator do not compress below ~135 without
+  dropping a checklist item.
+
+- **The "I don't know" routing rule pointed at the manager, and stopped one step short.** Both
+  unknowns are hers to answer, so the rule says hand them to her. It has nothing to say about an
+  unknown that is safe to ask verbally and unsafe to ask in a document the CEO will read. I split it
+  — unknowns to the sync, email kept forwardable — but that's improvisation, not the skill.
+
+- **The tiered-delivery clause in the checklist worked exactly as written.** "The anchor is the one
+  that completes the work; the earlier date is scope" made Nov 5 the anchor without argument, on a
+  brief where Oct 15 is the louder date.
+
+- **Naming a second gap type earned its place.** Dependency drag isn't decoration here: it's why the
+  email has two asks instead of one. The rule "mention the second only if it changes the plan"
+  produced a clean call in one pass.
+
+- **The skill assumes one ask.** Phase 4 says "an explicit ask," singular, and gives no guidance on
+  ordering two. I put the decision first and the escalation second because the decision is hers
+  alone and the escalation is a favor — a reasonable rule, but mine, not the skill's.
