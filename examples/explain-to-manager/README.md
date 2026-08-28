@@ -41,18 +41,23 @@ Behaviors exercised:
 
 ## What the runs found wrong with the skill
 
-Collected from the five sessions. Each is recorded in its own file too. Nothing here is fixed —
-these are findings against the skill as it stands.
+Collected from the five sessions; each is recorded in its own file too. The sessions above ran
+against the skill as it was before any of this was addressed, so they stay as the baseline record.
 
-| Finding | Seen in | Detail |
-|---|---|---|
-| No route for "I don't know" | 1, 2, 3, 4 | Phase 4 says don't invent, but nothing says what to do with a real gap. Each run improvised: drop it, convert it into a pre-meeting verification task, or hand it to the manager as an action item. That routing belongs in Phase 1. |
-| "Exactly one primary anchor" breaks on tiered delivery | 1, 2 | A partial ship has two dates by construction (Oct 1 and Nov 7; Oct 15 and Nov 5). The Phase 4 checklist reads as violated on a correct brief. |
-| The ~120-word exec cap fights the Phase 4 checklist | 2 | Two dates, two asks, a denominator, the date-moving risk, a cadence line, and a forwardable sentence do not fit in 120 words. The skill gives no priority order for what to cut first. |
-| No guidance when the manager forwards the artifact itself | 2 | The "if it's useful upward" block becomes a message inside the message. The run wrote the first sentence as the upward line instead — a judgment the skill should make explicit. |
-| Reset shape has no ★ for alternatives already ruled out | 2, 3 | "Can't we buy our way out of this?" is the first question back, and only the proposal shape's P3 asks for it. Reset's dimension E covers scope cuts, not eliminated technical options. |
-| The AI question in dimension C is unconditional | 1 | It fired on a project with no AI angle and burned a slot in a batch of four. It should be gated on the expectation actually involving a tooling speedup. |
-| Defense shape has no cadence requirement | 4 | The checklist demands a next-update promise for reset and proposal only. So a defense brief can end with an accepted cut and no scheduled proof that the accepted risk stayed cheap — which is the evidence that protects the rest of the spend at the next review. |
-| Nothing catches "the review is asking two questions" | 4 | Phase 0 asks format, audience, timing, and shape, never whether the circled line is the real ask. Here "what does this team do" decided the budget, and the fact that answered it surfaced by luck. |
-| Third-reset wording is demanded but not supplied | 1 | Dimension D requires "an explicit acknowledgment of the pattern" and the hard-question bank has no entry for "this is the third time". The run wrote it from scratch. |
-| Hard word caps push required content into the prep notes | 3 | At 150 words, the counter-proposal the manager is most likely to make survives only in the hard-questions section, not in the message they actually read. |
+| Finding | Seen in | Detail | Status |
+|---|---|---|---|
+| No route for "I don't know" | 1, 2, 3, 4 | Phase 4 says don't invent, but nothing says what to do with a real gap. Each run improvised: drop it, convert it into a pre-meeting verification task, or hand it to the manager as an action item. That routing belongs in Phase 1. | Fixed |
+| "Exactly one primary anchor" breaks on tiered delivery | 1, 2 | A partial ship has two dates by construction (Oct 1 and Nov 7; Oct 15 and Nov 5). The Phase 4 checklist reads as violated on a correct brief. | Fixed |
+| The ~120-word exec cap fights the Phase 4 checklist | 2 | Two dates, two asks, a denominator, the date-moving risk, a cadence line, and a forwardable sentence do not fit in 120 words. The skill gives no priority order for what to cut first. | Fixed |
+| No guidance when the manager forwards the artifact itself | 2 | The "if it's useful upward" block becomes a message inside the message. The run wrote the first sentence as the upward line instead — a judgment the skill should make explicit. | Fixed |
+| Reset shape has no ★ for alternatives already ruled out | 2, 3 | "Can't we buy our way out of this?" is the first question back, and only the proposal shape's P3 asks for it. Reset's dimension E covers scope cuts, not eliminated technical options. | Fixed |
+| Defense shape has no cadence requirement | 4 | The checklist demands a next-update promise for reset and proposal only. So a defense brief can end with an accepted cut and no scheduled proof that the accepted risk stayed cheap — which is the evidence that protects the rest of the spend at the next review. | Fixed |
+| Third-reset wording is demanded but not supplied | 1 | Dimension D requires "an explicit acknowledgment of the pattern" and the hard-question bank has no entry for "this is the third time". The run wrote it from scratch. | Fixed |
+| The AI question in dimension C is unconditional | 1 | Rejected on inspection. The bullet already reads "If AI/tooling was expected to accelerate this" — the run asked it anyway on a project with no AI angle. An agent miss, not a skill defect. | Won't fix |
+| Nothing catches "the review is asking two questions" | 4 | Phase 0 asks format, audience, timing, and shape, never whether the circled line is the real ask. Gap type 10 already names both questions in its "the manager thinks" column, so an extra intake question would cost every shape to serve one. | Won't fix |
+| Hard word caps push required content into the prep notes | 3 | At 150 words, the counter-proposal the manager is most likely to make survives only in the hard-questions section, not in the message they actually read. Same root as the exec-cap finding; the cut order addresses what to drop, not how to fit more in. | Open |
+
+Three more surfaced during the fix verification and are still open: slide bullets have no length
+cap, so slot pressure becomes length pressure; there's no cap-table row for a compound format like
+"slide plus talking points", and the two came out near-duplicates; and the ★ ruled-out-routes
+bullet has no playbook answer pattern for the reset-shape case where nothing was evaluated.

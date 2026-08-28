@@ -39,7 +39,7 @@ repos:
     hooks:
       - id: codespell
         additional_dependencies: ["tomli"]
-        args: ["--ignore-words-list=operato"]
+        args: ["--ignore-words-list=operato,coo"]
         # Verbatim captured model output. Editing it to satisfy a spellchecker
         # would falsify the benchmark evidence.
         exclude: ^benchmarks/developer-voice/bench/out/
