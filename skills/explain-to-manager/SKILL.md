@@ -57,6 +57,7 @@ Interview the engineer before writing anything. Rules of engagement:
 - Batch 3–4 questions at a time (use AskUserQuestion when available; otherwise ask in plain prose). Never dump all dimensions at once.
 - Never ask what the user already told you.
 - Push back on vagueness. "It's mostly done" gets "what specifically works end-to-end today, and what breaks if I try it?" Vague inputs produce the exact vague reassurances that caused this situation.
+- When an answer is "I don't know," route it before moving on: drop it if the brief doesn't need it, give it to the manager as something only they can answer, or hand the engineer a named task to check before the conversation. Never close the gap yourself.
 - Two to three rounds is typical. Stop when you can answer every checklist item in Phase 4 from interview material alone.
 
 For the **reset** shape cover dimensions A–E. For the **proposal** shape cover P1–P4 plus E. For the **defense** shape use P1–P4 with the substitutions at the end of this phase.
@@ -85,6 +86,7 @@ For the **reset** shape cover dimensions A–E. For the **proposal** shape cover
 - ★ What is the credible next milestone, and what date does the engineer actually believe at ≥80% confidence — not the date they think the manager wants?
   - Elicitation technique: ask "what date would you bet your weekend on?" — use that one, not the first date offered.
 - What are the realistic options with trade-offs: cut scope, move the date, add help, de-risk with a spike? Managers respond far better to a menu than to a verdict.
+- ★ What faster route has already been ruled out, and what does it miss? "Can't we buy our way out of this?" is the first question back. If nothing was evaluated, the brief says so rather than implying a comparison.
 - What does the engineer need from the manager — a decision, an escalation, air cover, or nothing?
 - What will be *demonstrably true* at the next checkpoint? ("You'll see it process a real customer file on the 15th" beats "it'll be further along.")
 
@@ -149,7 +151,7 @@ Apply these when drafting. The full engineer-speak → business-speak dictionary
 Produce, in the requested format:
 
 1. **The headline** — ≤25 words. State + new checkpoint + tone of control.
-2. **The brief** — skeleton by shape. **Reset:** Headline → What's solid → What we learned / what changed → New plan with checkpoint dates → Risks and what would move the date → Options + the ask (or "nothing needed") → Next update. **Proposal:** Headline → What → Why now (stakes of inaction) → Cost with its denominator → Plan + review checkpoint → The ask or veto window → Next update. **Defense:** Headline → What it quietly prevents (last-lapse evidence) → Cost vs. exposure of cutting → Informed-cut menu with named risks → The ask. Length caps by format: email ≤250 words, Slack ≤150, slide = headline + 5 bullets, 1:1 talking points ≤6 lines (they must survive being remembered under stress). Managers skim; brevity reads as control.
+2. **The brief** — skeleton by shape. **Reset:** Headline → What's solid → What we learned / what changed → New plan with checkpoint dates → Risks and what would move the date → Options + the ask (or "nothing needed") → Next update. **Proposal:** Headline → What → Why now (stakes of inaction) → Cost with its denominator → Plan + review checkpoint → The ask or veto window → Next update. **Defense:** Headline → What it quietly prevents (last-lapse evidence) → Cost vs. exposure of cutting → Informed-cut menu with named risks → The ask, with a review point attached to any cut taken. Length caps by format: email ≤250 words, Slack ≤150, slide = headline + 5 bullets, 1:1 talking points ≤6 lines (they must survive being remembered under stress). Managers skim; brevity reads as control. When the cap and the skeleton collide, cut the analogy first. Then cut the separate upward line if the manager forwards or presents the brief itself, since its first sentence already does that job — and the next-update line if they don't. Cutting an element waives its checklist item below. The anchor and the ask are never what gets cut.
 3. **Hard-questions prep** — the 3–5 toughest questions *this* manager will ask, with suggested answers built from interview material. Always consider: "Why am I only hearing this now?", "Can't we add people?", "I thought AI made this fast?", "What can you give me by <earlier date>?", "How sure are you about the new date?" Answer patterns are in the playbook.
 4. **Personal do-not-say list** — 3–5 lines the engineer is most likely to blurt under pressure, given how they talked during the interview, with the replacement phrasing.
 5. **The promised follow-up (offer it)** — a pre-structured skeleton of the next update the brief commits to (the Friday status line, the month-one cost review). The cadence promise is what rebuilds trust; this makes it get kept.
@@ -157,12 +159,12 @@ Produce, in the requested format:
 Before delivering, verify every item:
 
 - [ ] A non-engineer could read the brief aloud to a CEO without stumbling on a single term.
-- [ ] Exactly one primary anchor, matched to the shape: a delivery date the engineer stated ≥80% confidence in (reset), an enablement date plus first review point (proposal), or a cost-vs-exposure comparison (defense).
+- [ ] One primary anchor, matched to the shape: a delivery date the engineer stated ≥80% confidence in (reset), an enablement date plus first review point (proposal), or a cost-vs-exposure comparison (defense). Tiered delivery has two dates — the anchor is the one that completes the work; the earlier date is scope.
 - [ ] The "why" reads as discovery/scouting, not excuse.
 - [ ] There's an explicit ask, or an explicit "nothing needed from you."
-- [ ] Contains the quotable upward line; reset and proposal briefs also commit to a next-update cadence.
+- [ ] Contains the quotable upward line; reset and proposal briefs also commit to a next-update cadence, and a defense brief offering a cut names when it will report what the accepted risk actually cost.
 - [ ] No sentence blames a person, a team, or a tool.
-- [ ] Every claim, number, and date traces to an interview answer — nothing invented.
+- [ ] Every claim, number, and date traces to an interview answer — nothing invented, and every unknown was dropped, handed to the manager, or assigned as a check before the conversation.
 
 Then offer one iteration pass: read the draft *as the manager* and report what it triggers — alarm, confusion, or confidence — and adjust.
 
