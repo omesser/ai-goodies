@@ -409,7 +409,6 @@ do_go() {
   fi
 }
 
-
 do_rust() {
   # Free/OSS Rust lane (cargo-audit, cargo-deny, cargo-geiger, optional clippy).
   # Inspired by https://github.com/osirislab/awesome-rust-security — Static Code Auditing.
@@ -422,7 +421,7 @@ do_rust() {
     skip "cargo clippy (needs cargo)"
     return 0
   fi
-  if has_cmd cargo-audit || cargo audit -V >/dev/null 2>&1; then
+  if has_cmd cargo-audit || cargo audit -V > /dev/null 2>&1; then
     # Prefer Cargo.lock advisories; --deny warnings makes unmaintained/yanked visible
     if [[ -f Cargo.lock ]]; then
       bounded "cargo-audit" 400 cargo audit
@@ -436,13 +435,13 @@ do_rust() {
 
   section "Rust policy (cargo-deny)"
   if [[ -f deny.toml ]] || [[ -f cargo-deny.toml ]]; then
-    if has_cmd cargo-deny || cargo deny --version >/dev/null 2>&1; then
+    if has_cmd cargo-deny || cargo deny --version > /dev/null 2>&1; then
       bounded "cargo-deny" 400 cargo deny check
     else
       skip "cargo-deny (cargo install cargo-deny --locked)"
     fi
   else
-    if has_cmd cargo-deny || cargo deny --version >/dev/null 2>&1; then
+    if has_cmd cargo-deny || cargo deny --version > /dev/null 2>&1; then
       warn "No deny.toml — running advisories check only (cargo deny init to configure bans/licenses/sources)"
       bounded "cargo-deny-advisories" 300 cargo deny check advisories
     else
@@ -451,7 +450,7 @@ do_rust() {
   fi
 
   section "Rust unsafe inventory (cargo-geiger)"
-  if has_cmd cargo-geiger || cargo geiger --version >/dev/null 2>&1; then
+  if has_cmd cargo-geiger || cargo geiger --version > /dev/null 2>&1; then
     warn "Informational — geiger counts unsafe usage; not an automatic fail"
     bounded "cargo-geiger" 300 cargo geiger --output-format Ascii --quiet
   else
@@ -460,7 +459,7 @@ do_rust() {
 
   section "Rust SAST (clippy, optional security-oriented lints)"
   # Optional: skip this whole section with --skip rust (parent scanner) — or omit clippy component.
-  if cargo clippy -V >/dev/null 2>&1; then
+  if cargo clippy -V > /dev/null 2>&1; then
     warn "Informational clippy pass — security-oriented allows; review output, do not treat all as blockers"
     # undocumented_unsafe_blocks + a few memory/FFI footguns; avoid unwrap_used (too noisy for most repos)
     bounded "cargo-clippy" 400 cargo clippy --workspace --all-targets --message-format=short -- \
