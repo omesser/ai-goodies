@@ -11,6 +11,7 @@ Runs live security scans on the current repo, interprets findings, then applies 
 | **Kubernetes** | `checkov --framework kubernetes` |
 | **JavaScript / TypeScript** | `npm audit`; `semgrep p/javascript p/typescript p/owasp-top-ten` |
 | **Go** | `govulncheck`; `semgrep p/golang p/owasp-top-ten` |
+| **Rust** | `cargo audit` (RustSec); `cargo deny` (full if `deny.toml`, else advisories); `cargo geiger` (unsafe inventory, informational); optional `cargo clippy` with security-oriented lints |
 | **Shell** | `shellcheck` |
 | **Helm** | `helm lint` |
 | **Secrets (all)** | `trufflehog git --only-verified` |
@@ -66,7 +67,8 @@ Run the scan scripts directly:
 ```bash
 bash scripts/scan.sh                          # full scan, all applicable tools
 bash scripts/scan.sh --changed-only           # scope to changed files only
-bash scripts/scan.sh --only secrets,python    # specific scanners
+bash scripts/scan.sh --only secrets,python,rust  # specific scanners
+bash scripts/scan.sh --skip rust                 # skip Rust lane
 bash scripts/scan.sh --skip trivy --save-reports --fail-on-findings
 ```
 
@@ -93,6 +95,13 @@ brew install shellcheck
 
 # Go
 go install golang.org/x/vuln/cmd/govulncheck@latest
+
+# Rust (https://github.com/osirislab/awesome-rust-security — Static Code Auditing)
+# requires rustup/cargo first: https://rustup.rs
+cargo install cargo-audit --locked
+cargo install cargo-deny --locked          # optional but recommended
+cargo install cargo-geiger --locked        # optional unsafe inventory
+rustup component add clippy                # optional SAST lints
 ```
 
 ## Policies
