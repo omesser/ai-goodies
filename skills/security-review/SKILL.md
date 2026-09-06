@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: Run a live security and compliance scan on the current repo — Python, Terraform, Kubernetes, JavaScript, Go, Shell, Helm, and secrets — applying the Company SDLC, Change Management, and Generative AI Use and Oversight compliance framework, and write a structured report.
+description: Run a live security and compliance scan on the current repo — Python, Terraform, Kubernetes, JavaScript, Go, Rust, Shell, Helm, and secrets — applying the Company SDLC, Change Management, and Generative AI Use and Oversight compliance framework, and write a structured report.
 disable-model-invocation: true
 allowed-tools: Bash(*), Write(*)
 ---
@@ -82,7 +82,7 @@ bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh --save-reports
 
 **Available flags:**
 - `--changed-only` — scope to files changed vs main
-- `--only secrets,python` — run only named scanners
+- `--only secrets,python,rust` — run only named scanners
 - `--skip trivy,ml` — skip named scanners
 - `--save-reports` — write each scanner's raw output to `./.security_scan/.reports/<name>.txt`
 - `--fail-on-findings` — exit 1 if any HIGH/CRITICAL finding is recorded
@@ -93,6 +93,9 @@ bash ${CLAUDE_SKILL_DIR}/scripts/scan.sh --save-reports
 ---
 
 ## Phase 3 — Interpret scan results
+
+**Rust lane (when `Cargo.toml` detected):** treat `cargo audit` / RustSec IDs as first-class SCA (peer of pip-audit / govulncheck). Prefer those over duplicate Trivy Cargo.lock hits for the same advisory. `cargo deny` full check runs when `deny.toml` exists; otherwise advisories-only. `cargo geiger` and security-oriented `clippy` are **informational** — summarize unsafe hotspots and real clippy hits; do not auto-block solely on geiger counts.
+
 
 **Scope filter**: if `SCOPE_FILES` was set in Phase 0 (main + uncommitted changes, or main + recent commits), report only findings in those files. Findings in files outside `SCOPE_FILES` are pre-existing issues outside the scope of this review — note their count in a single line ("N pre-existing findings in out-of-scope files — not reported") and do not list them.
 

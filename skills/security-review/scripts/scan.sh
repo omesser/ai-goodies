@@ -11,7 +11,7 @@
 #   --timeout  N            Per-tool timeout in seconds (default: 120)
 #
 # Scanners: secrets patterns python iac dockerfile gha kubernetes shell helm
-#           js go trivy ml ai
+#           js go rust trivy ml ai
 #
 # Companion scripts (auto-loaded from same directory):
 #   scan-patterns.sh  — grep-based Company-specific bad-pattern checks
@@ -28,7 +28,7 @@ SAVE_REPORTS=0
 FAIL_ON_FINDINGS=0
 NO_COLOR=0
 TOOL_TIMEOUT=120
-ALL_SCANNERS="secrets patterns python iac dockerfile gha kubernetes shell helm js go trivy ml ai"
+ALL_SCANNERS="secrets patterns python iac dockerfile gha kubernetes shell helm js go rust trivy ml ai"
 RUN_SCANNERS="$ALL_SCANNERS"
 
 while [[ $# -gt 0 ]]; do
@@ -152,6 +152,7 @@ HAS_GHA=0
 HAS_KUBE=0
 HAS_JS=0
 HAS_GO=0
+HAS_RUST=0
 HAS_HELM=0
 HAS_SHELL=0
 HAS_ML=0
@@ -169,6 +170,7 @@ grep -rql '^kind:' --include='*.yaml' --include='*.yml' . 2> /dev/null |
   grep -qv '.git/' && HAS_KUBE=1 && echo "Kubernetes"
 [[ -f package.json ]] && HAS_JS=1 && echo "JavaScript/TypeScript"
 [[ -f go.mod ]] && HAS_GO=1 && echo "Go"
+{ [[ -f Cargo.toml ]] || [[ -n "$(qfind 'Cargo.toml')" ]]; } && HAS_RUST=1 && echo "Rust"
 [[ -n "$(qfind 'Chart.yaml')" ]] && HAS_HELM=1 && echo "Helm"
 [[ -n "$(qfind '*.sh')" ]] && HAS_SHELL=1 && echo "Shell scripts"
 { [[ -n "$(qfind '*.pkl')" ]] || [[ -n "$(qfind '*.pt')" ]] ||
@@ -176,7 +178,7 @@ grep -rql '^kind:' --include='*.yaml' --include='*.yml' . 2> /dev/null |
   HAS_ML=1 && warn "ML model files found — unsafe serialization risk"
 
 export HAS_PYTHON HAS_NOX_SEMGREP HAS_TF HAS_TERRAGRUNT HAS_DOCKERFILE \
-  HAS_GHA HAS_KUBE HAS_JS HAS_GO HAS_HELM HAS_SHELL HAS_ML
+  HAS_GHA HAS_KUBE HAS_JS HAS_GO HAS_RUST HAS_HELM HAS_SHELL HAS_ML
 
 # ── changed-only scoping ──────────────────────────────────────────────────────
 
@@ -197,6 +199,7 @@ if [[ $CHANGED_ONLY -eq 1 ]]; then
     echo "$CHANGED_FILES" | grep -qE '\.sh$' || HAS_SHELL=0
     echo "$CHANGED_FILES" | grep -qE '\.(js|ts|jsx|tsx)$' || HAS_JS=0
     echo "$CHANGED_FILES" | grep -qE '\.go$' || HAS_GO=0
+    echo "$CHANGED_FILES" | grep -qE '(\.rs$|Cargo\.(toml|lock)$)' || HAS_RUST=0
   fi
 fi
 export CHANGED_FILES
@@ -406,6 +409,71 @@ do_go() {
   fi
 }
 
+
+do_rust() {
+  # Free/OSS Rust lane (cargo-audit, cargo-deny, cargo-geiger, optional clippy).
+  # Inspired by https://github.com/osirislab/awesome-rust-security — Static Code Auditing.
+
+  section "Rust SCA (cargo-audit / RustSec)"
+  if ! has_cmd cargo; then
+    skip "cargo-audit (install Rust toolchain: https://rustup.rs)"
+    skip "cargo-deny (needs cargo)"
+    skip "cargo-geiger (needs cargo)"
+    skip "cargo clippy (needs cargo)"
+    return 0
+  fi
+  if has_cmd cargo-audit || cargo audit -V >/dev/null 2>&1; then
+    # Prefer Cargo.lock advisories; --deny warnings makes unmaintained/yanked visible
+    if [[ -f Cargo.lock ]]; then
+      bounded "cargo-audit" 400 cargo audit
+    else
+      warn "No Cargo.lock — cargo audit coverage is limited; commit a lockfile for apps/binaries"
+      bounded "cargo-audit" 400 cargo audit
+    fi
+  else
+    skip "cargo-audit (cargo install cargo-audit --locked)"
+  fi
+
+  section "Rust policy (cargo-deny)"
+  if [[ -f deny.toml ]] || [[ -f cargo-deny.toml ]]; then
+    if has_cmd cargo-deny || cargo deny --version >/dev/null 2>&1; then
+      bounded "cargo-deny" 400 cargo deny check
+    else
+      skip "cargo-deny (cargo install cargo-deny --locked)"
+    fi
+  else
+    if has_cmd cargo-deny || cargo deny --version >/dev/null 2>&1; then
+      warn "No deny.toml — running advisories check only (cargo deny init to configure bans/licenses/sources)"
+      bounded "cargo-deny-advisories" 300 cargo deny check advisories
+    else
+      skip "cargo-deny (optional: cargo install cargo-deny --locked && cargo deny init)"
+    fi
+  fi
+
+  section "Rust unsafe inventory (cargo-geiger)"
+  if has_cmd cargo-geiger || cargo geiger --version >/dev/null 2>&1; then
+    warn "Informational — geiger counts unsafe usage; not an automatic fail"
+    bounded "cargo-geiger" 300 cargo geiger --output-format Ascii --quiet
+  else
+    skip "cargo-geiger (cargo install cargo-geiger --locked)"
+  fi
+
+  section "Rust SAST (clippy, optional security-oriented lints)"
+  # Optional: skip this whole section with --skip rust (parent scanner) — or omit clippy component.
+  if cargo clippy -V >/dev/null 2>&1; then
+    warn "Informational clippy pass — security-oriented allows; review output, do not treat all as blockers"
+    # undocumented_unsafe_blocks + a few memory/FFI footguns; avoid unwrap_used (too noisy for most repos)
+    bounded "cargo-clippy" 400 cargo clippy --workspace --all-targets --message-format=short -- \
+      -W clippy::undocumented_unsafe_blocks \
+      -W clippy::transmute_ptr_to_ptr \
+      -W clippy::cast_ptr_alignment \
+      -W clippy::mut_from_ref \
+      -A clippy::all
+  else
+    skip "cargo clippy (rustup component add clippy)"
+  fi
+}
+
 do_trivy() {
   section "Multi-language SCA + misconfig (trivy)"
   if has_cmd trivy; then
@@ -482,13 +550,14 @@ should_run "shell" && [[ $HAS_SHELL -eq 1 ]] && submit "shell" do_shell
 should_run "helm" && [[ $HAS_HELM -eq 1 ]] && submit "helm" do_helm
 should_run "js" && [[ $HAS_JS -eq 1 ]] && submit "js" do_js
 should_run "go" && [[ $HAS_GO -eq 1 ]] && submit "go" do_go
+should_run "rust" && [[ $HAS_RUST -eq 1 ]] && submit "rust" do_rust
 should_run "trivy" && submit "trivy" do_trivy
 should_run "ml" && [[ $HAS_ML -eq 1 ]] && submit "ml" do_ml
 should_run "ai" && submit "ai" do_ai
 submit "sod" do_sod
 
 # Collect in defined order — each collect() blocks until that scanner finishes
-for scanner in secrets patterns python iac dockerfile gha kubernetes shell helm js go trivy ml ai sod; do
+for scanner in secrets patterns python iac dockerfile gha kubernetes shell helm js go rust trivy ml ai sod; do
   collect "$scanner"
 done
 
