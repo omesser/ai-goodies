@@ -10,6 +10,7 @@ Collected AI/agentic engineering artifacts from various codebases — ready to a
 | [`skills/`](skills/) | Claude Code slash-command skills (`.claude/skills/` or `.agents/skills/`) |
 | [`guides/`](guides/) | How-to prose: AGENTS.md, skills, plugins |
 | [`benchmarks/`](benchmarks/) | A/B harnesses and results for skills, kept out of the skill folders so they aren't installed |
+| [`examples/`](examples/) | Worked end-to-end sessions showing a skill in use, kept out of the skill folders so they aren't installed |
 
 ## Installing a skill
 
@@ -41,7 +42,7 @@ Then invoke it in a new session — e.g. `/explain-to-manager` in Claude Code. S
 | [`reindex-docs/`](skills/reindex-docs/) | Partial — uses monorepo build scripts | Pattern is general; script invocation is build-tool-specific |
 | [`linkedin-post-engine/`](skills/linkedin-post-engine/) | ❌ No — personal content skill (Oded's voice) | Imported from grok/ClawHub; keeps provenance files |
 | [`expected-value-calculator/`](skills/expected-value-calculator/) | ✅ Yes | Finance/investing (not a SWE skill), but fully reusable: self-contained live data via `yfinance` + deterministic EV math. Imported from grok/ClawHub |
-| [`explain-to-manager/`](skills/explain-to-manager/) | ✅ Yes | Interview-driven manager briefs: status resets ("it's not ready / AI didn't 100x it"), spend proposals, and defenses of invisible work — trust-preserving, with hard-question prep |
+| [`explain-to-manager/`](skills/explain-to-manager/) | ✅ Yes | Interview-driven manager briefs: status resets ("it's not ready / AI didn't 100x it"), spend proposals, and defenses of invisible work — trust-preserving, with hard-question prep. Five worked sessions in [`examples/explain-to-manager/`](examples/explain-to-manager/) |
 | [`check-prod-readiness/`](skills/check-prod-readiness/) | Partial — checklist is general; quality gates assume Python + nox | Pre-merge production-readiness gate: config hygiene, code checks, nox tests/lint, pre-commit |
 | [`scrooge-check/`](skills/scrooge-check/) | ✅ Yes | Pre-mortem for risky changes, styled as A Christmas Carol: Ghost of Past finds prior incidents via git history, Ghost of Present audits the diff for real risk smells, Ghost of Future writes a satirical incident report tracing back to them — verdict gates go/no-go |
 | [`daily-news-briefing/`](skills/daily-news-briefing/) | ✅ Yes — swap the regions/instruments for your own | User-invoked geopolitics + markets briefing built for scheduled runs: commentary-first search, every item carries its "so what", every market move tagged priced-in or not, trade ideas dropped unless a mispricing is named |
