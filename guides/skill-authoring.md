@@ -43,10 +43,11 @@ one-line human-facing summary and strip the trigger phrasing. Context cost drops
 for by you having to remember the skill exists.
 
 Choose model-invoked only when the agent must reach the skill unprompted, or another skill must
-reach it. Otherwise prefer user-invoked. Four skills here use it, for two distinct reasons:
+reach it. Otherwise prefer user-invoked. Five skills here use it, for two distinct reasons:
 
-- **The user owns the decision.** A voice or persona skill (`developer-voice`) that the agent
-  re-triggered on its own would swap register mid-task.
+- **The user owns the decision.** `developer-voice` sets a register the agent must not swap on
+  its own. `bro` restates the last message in plain language, which only makes sense when you
+  ask for it.
 - **The run is expensive or noisy.** `security-review`, `scrooge-check`, and
   `daily-news-briefing` each burn real time or tokens, so an autonomous trigger is a liability.
 
