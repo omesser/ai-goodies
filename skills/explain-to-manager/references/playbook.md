@@ -2,6 +2,17 @@
 
 Companion to [SKILL.md](../SKILL.md). Use during Phase 3 (translation) and Phase 4 (deliverables).
 
+## Content List
+
+- [Translation dictionary](#translation-dictionary)
+- [Analogy bank](#analogy-bank)
+- [Hard-question answer patterns](#hard-question-answer-patterns)
+- [Worked examples](#worked-examples)
+  - [1. Feature slip (Iceberg)](#1-feature-slip-iceberg)
+  - [2. Tech not integrated (Last-mile)](#2-tech-not-integrated-last-mile)
+  - [3. AI didn't 100x the work (AI reality check + iceberg)](#3-ai-didnt-100x-the-work-ai-reality-check--iceberg)
+  - [4. Proactive spend ask (Insurance ask)](#4-proactive-spend-ask-insurance-ask)
+
 ## Translation dictionary
 
 Engineer-speak on the left never appears in a deliverable. Adapt the right side to the specifics gathered in the interview — these are patterns, not paste-ready strings.

@@ -7,6 +7,15 @@ The skill is `disable-model-invocation: true`, so the agent never fires it on it
 deliberate: an agent that switches its own register mid-task is unpredictable in exactly the
 way a voice skill is supposed to prevent. You decide when the register changes.
 
+## Content List
+
+- [Measured effect](#measured-effect)
+- [Install first](#install-first)
+- [Mode 1 — per session, by hand](#mode-1--per-session-by-hand)
+- [Mode 2 — always on, via hooks (recommended)](#mode-2--always-on-via-hooks-recommended)
+- [Mode 3 — project instruction files (not recommended)](#mode-3--project-instruction-files-not-recommended)
+- [Not the mechanism](#not-the-mechanism)
+
 ## Measured effect
 
 Seven prompts, two arms, three repetitions — 42 sessions with every other plugin disabled.

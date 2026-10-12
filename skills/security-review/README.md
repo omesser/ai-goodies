@@ -2,6 +2,16 @@
 
 Runs live security scans on the current repo, interprets findings, then applies Company's Secure SDLC and Change Management compliance framework to produce a verdict.
 
+## Content List
+
+- [What it runs](#what-it-runs)
+- [What it checks (compliance framework)](#what-it-checks-compliance-framework)
+- [Scripts](#scripts)
+- [Install](#install)
+- [Usage](#usage)
+- [Prerequisites](#prerequisites)
+- [Policies](#policies)
+
 ## What it runs
 
 | Language / Stack | Tools |
