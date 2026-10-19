@@ -250,7 +250,7 @@ do_python() {
       bounded "semgrep" 500 semgrep scan \
         --config=p/python --config=p/ci --config=p/bandit \
         --config=p/secrets --config=p/owasp-top-ten --config=p/security-audit \
-        --severity=WARNING --max-target-bytes=2000000 \
+        --severity=WARNING --severity=ERROR --max-target-bytes=2000000 \
         --timeout=120 --timeout-threshold=5 \
         --sarif-output=.reports/semgrep.sarif \
         $targets
@@ -385,7 +385,7 @@ do_js() {
   if has_cmd semgrep; then
     bounded "semgrep-js" 300 semgrep scan \
       --config=p/javascript --config=p/typescript --config=p/owasp-top-ten \
-      --severity=WARNING --max-target-bytes=2000000
+      --severity=WARNING --severity=ERROR --max-target-bytes=2000000
   else
     skip "semgrep js/ts (pip install semgrep)"
   fi
@@ -403,7 +403,7 @@ do_go() {
   if has_cmd semgrep; then
     bounded "semgrep-go" 300 semgrep scan \
       --config=p/golang --config=p/owasp-top-ten \
-      --severity=WARNING --max-target-bytes=2000000
+      --severity=WARNING --severity=ERROR --max-target-bytes=2000000
   else
     skip "semgrep go (pip install semgrep)"
   fi
