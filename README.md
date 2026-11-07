@@ -49,6 +49,7 @@ Then invoke it in a new session — e.g. `/explain-to-manager` in Claude Code. S
 | [`developer-voice/`](skills/developer-voice/) | ✅ Yes — user-invoked only | Register reset distilled from [Google's developer documentation style guide](https://developers.google.com/style) + [eng-practices](https://google.github.io/eng-practices/): write like a knowledgeable friend who knows the reader is in a hurry. Substitutions table (`simply` / `please note` / sycophancy / ableist idioms), one-idea-per-sentence rule, and per-surface shapes for chat, commits, PRs, code comments, errors, and review feedback. Measured in [`benchmarks/developer-voice/`](benchmarks/developer-voice/) |
 | [`bro/`](skills/bro/) | ✅ Yes — user-invoked only | Restate the last message in plain language, with no jargon |
 | [`unslop/`](skills/unslop/) | ✅ Yes — user-invoked only | Cut AI tells from any writing. Imported verbatim from [cursor/plugins `pstack`](https://github.com/cursor/plugins/blob/bc697d0a5a163cec979e362b601e36f5616083fd/pstack/skills/unslop/SKILL.md) (MIT, license kept alongside) |
+| [`analyze-stock-graph/`](skills/analyze-stock-graph/) | ✅ Yes — user-invoked only | Chart read: Edwards & Magee for structure and patterns, William O'Neil's buy rules. Returns a verdict, pivot or entry, stop in ATRs, target and R:R, and the invalidation level |
 
 > Note: some skills are imported from the grok/ClawHub marketplace and retain their `_meta.json` / `skill-card.md` provenance files.
 
