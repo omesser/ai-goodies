@@ -20,7 +20,7 @@ import os
 import re
 import subprocess
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -43,32 +43,31 @@ def load_dotenv_file(path: str) -> None:
             os.environ.setdefault(key.strip(), value.strip())
 
 
-def http_get_json(url: str, headers: Dict[str, str]) -> Dict[str, Any]:
+def http_get_json(url: str, headers: dict[str, str]) -> dict[str, Any]:
     request = Request(url, headers=headers, method="GET")
     with urlopen(request, timeout=30) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
-def run_git(args: List[str]) -> str:
+def run_git(args: list[str]) -> str:
     result = subprocess.run(
         ["git"] + args,
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=True,
     )
     return result.stdout.strip()
 
 
-def read_commits(path: str) -> List[Dict[str, Any]]:
+def read_commits(path: str) -> list[dict[str, Any]]:
     with open(path, "r", encoding="utf-8") as file:
         commits = json.load(file)
     if not isinstance(commits, list):
-        raise RuntimeError("Input JSON must be an array of commits")
+        raise TypeError("Input JSON must be an array of commits")
     return commits
 
 
-def parse_pr_number_from_subject(subject: str) -> Optional[int]:
+def parse_pr_number_from_subject(subject: str) -> int | None:
     patterns = (
         GITHUB_MERGED_PR_SUBJECT_PATTERN,
         GITHUB_SQUASH_PR_SUBJECT_PATTERN,
@@ -84,7 +83,7 @@ def parse_pr_number_from_subject(subject: str) -> Optional[int]:
     return None
 
 
-def extract_pr_number(commit: Dict[str, Any]) -> Optional[int]:
+def extract_pr_number(commit: dict[str, Any]) -> int | None:
     raw = commit.get("pr_number")
     if isinstance(raw, int):
         return raw
@@ -93,7 +92,7 @@ def extract_pr_number(commit: Dict[str, Any]) -> Optional[int]:
     return parse_pr_number_from_subject(str(commit.get("subject", "")))
 
 
-def parse_repo_full_name_from_remote(remote_url: str) -> Optional[str]:
+def parse_repo_full_name_from_remote(remote_url: str) -> str | None:
     remote_url = remote_url.strip()
     if not remote_url:
         return None
@@ -124,12 +123,11 @@ def parse_repo_full_name_from_remote(remote_url: str) -> Optional[str]:
         return None
 
     repo_name = parts[1]
-    if repo_name.endswith(".git"):
-        repo_name = repo_name[:-4]
+    repo_name = repo_name.removesuffix(".git")
     return parts[0] + "/" + repo_name
 
 
-def resolve_repo_full_name() -> Optional[str]:
+def resolve_repo_full_name() -> str | None:
     try:
         remote_url = run_git(["remote", "get-url", "origin"])
     except subprocess.CalledProcessError:
@@ -137,7 +135,7 @@ def resolve_repo_full_name() -> Optional[str]:
     return parse_repo_full_name_from_remote(remote_url)
 
 
-def github_headers(token: str) -> Dict[str, str]:
+def github_headers(token: str) -> dict[str, str]:
     headers = {
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
@@ -148,8 +146,8 @@ def github_headers(token: str) -> Dict[str, str]:
 
 
 def fetch_pr(
-    repo_full_name: str, pr_number: int, headers: Dict[str, str]
-) -> Dict[str, Any]:
+    repo_full_name: str, pr_number: int, headers: dict[str, str]
+) -> dict[str, Any]:
     url = "https://api.github.com/repos/" + repo_full_name + "/pulls/" + str(pr_number)
     pr = http_get_json(url, headers=headers)
     return {
@@ -193,7 +191,7 @@ def main() -> int:
 
     github_token = os.environ.get("GITHUB_TOKEN", "").strip()
     if not github_token:
-        passthrough_commits: List[Dict[str, Any]] = []
+        passthrough_commits: list[dict[str, Any]] = []
         for commit in commits:
             pr_number = extract_pr_number(commit)
             commit_out = dict(commit)
@@ -212,7 +210,7 @@ def main() -> int:
         )
         return 1
 
-    unique_pr_numbers: List[int] = []
+    unique_pr_numbers: list[int] = []
     seen_pr_numbers = set()
     for commit in commits:
         pr_number = extract_pr_number(commit)
@@ -221,7 +219,7 @@ def main() -> int:
         seen_pr_numbers.add(pr_number)
         unique_pr_numbers.append(pr_number)
 
-    prs_by_number: Dict[int, Dict[str, Any]] = {}
+    prs_by_number: dict[int, dict[str, Any]] = {}
     headers = github_headers(github_token)
     for pr_number in unique_pr_numbers:
         try:
@@ -248,7 +246,7 @@ def main() -> int:
                 "details": str(err),
             }
 
-    enriched_commits: List[Dict[str, Any]] = []
+    enriched_commits: list[dict[str, Any]] = []
     for commit in commits:
         pr_number = extract_pr_number(commit)
         commit_out = dict(commit)

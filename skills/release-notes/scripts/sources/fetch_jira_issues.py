@@ -22,7 +22,7 @@ import json
 import os
 import re
 import sys
-from typing import Any, Dict, List
+from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -41,7 +41,7 @@ def load_dotenv_file(path: str) -> None:
             os.environ.setdefault(key.strip(), value.strip())
 
 
-def http_get_json(url: str, headers: Dict[str, str]) -> Dict[str, Any]:
+def http_get_json(url: str, headers: dict[str, str]) -> dict[str, Any]:
     req = Request(url, headers=headers, method="GET")
     with urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode("utf-8"))
@@ -83,9 +83,9 @@ def get_cloud_id(base_url: str) -> str:
     return cloud_id
 
 
-def ordered_unique(items: List[str]) -> List[str]:
+def ordered_unique(items: list[str]) -> list[str]:
     seen = set()
-    result: List[str] = []
+    result: list[str] = []
     for item in items:
         if item in seen:
             continue
@@ -94,15 +94,15 @@ def ordered_unique(items: List[str]) -> List[str]:
     return result
 
 
-def read_commits(path: str) -> List[Dict[str, Any]]:
+def read_commits(path: str) -> list[dict[str, Any]]:
     with open(path, "r", encoding="utf-8") as f:
         commits = json.load(f)
     if not isinstance(commits, list):
-        raise RuntimeError("Input JSON must be an array of commits")
+        raise TypeError("Input JSON must be an array of commits")
     return commits
 
 
-def extract_jira_keys(commit: Dict[str, Any]) -> List[str]:
+def extract_jira_keys(commit: dict[str, Any]) -> list[str]:
     existing = commit.get("jira_keys")
     if isinstance(existing, list):
         return ordered_unique(
@@ -150,7 +150,7 @@ def main() -> int:
     email = os.environ.get("EMAIL", "").strip()
     jira_token = os.environ.get("JIRA_TOKEN", "").strip()
     if not jira_token:
-        passthrough_commits: List[Dict[str, Any]] = []
+        passthrough_commits: list[dict[str, Any]] = []
         for commit in commits:
             keys = extract_jira_keys(commit)
             commit_out = dict(commit)
@@ -172,7 +172,7 @@ def main() -> int:
         )
         return 1
 
-    auth = base64.b64encode(f"{email}:{jira_token}".encode("utf-8")).decode("ascii")
+    auth = base64.b64encode(f"{email}:{jira_token}".encode()).decode("ascii")
     headers = {"Authorization": "Basic " + auth, "Accept": "application/json"}
 
     try:
@@ -181,11 +181,11 @@ def main() -> int:
         sys.stderr.write(f"Failed to resolve cloud id from ATLASSIAN_BASE_URL: {err}\n")
         return 1
 
-    unique_keys: List[str] = ordered_unique(
+    unique_keys: list[str] = ordered_unique(
         [key for commit in commits for key in extract_jira_keys(commit)]
     )
 
-    issues_by_key: Dict[str, Dict[str, Any]] = {}
+    issues_by_key: dict[str, dict[str, Any]] = {}
     for key in unique_keys:
         url = (
             "https://api.atlassian.com/ex/jira/"
@@ -213,6 +213,7 @@ def main() -> int:
             }
         except URLError as err:
             issues_by_key[key] = {"key": key, "error": "network", "details": str(err)}
+
         except Exception as err:
             issues_by_key[key] = {
                 "key": key,
@@ -220,7 +221,7 @@ def main() -> int:
                 "details": str(err),
             }
 
-    enriched_commits: List[Dict[str, Any]] = []
+    enriched_commits: list[dict[str, Any]] = []
     for commit in commits:
         keys = extract_jira_keys(commit)
         commit_out = dict(commit)

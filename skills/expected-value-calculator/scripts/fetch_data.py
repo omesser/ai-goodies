@@ -8,7 +8,7 @@ Prints JSON. Every field independently degrades to null on failure — never a f
 
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import yfinance as yf
 
@@ -72,9 +72,7 @@ def fetch(ticker):
         out["beta"] = info.get("beta")
         ts = info.get("earningsTimestamp")
         out["next_earnings"] = (
-            datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()
-            if ts
-            else None
+            datetime.fromtimestamp(ts, tz=UTC).date().isoformat() if ts else None
         )
     except Exception as e:
         out["price"] = None

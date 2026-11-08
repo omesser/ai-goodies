@@ -56,7 +56,7 @@ BANNED = [
 
 def split_code(text):
     """Return (full_text, prose_only)."""
-    prose = re.sub(r"```.*?\n.*?```", "", text, flags=re.S)
+    prose = re.sub(r"```.*?\n.*?```", "", text, flags=re.DOTALL)
     prose = re.sub(r"`[^`]*`", "", prose)
     return text, prose
 
