@@ -115,7 +115,7 @@ Two things worth confirming before you publish: whether your defaults actually m
 **1. SQL injection — line with `db.execute(... % ...)`**
 
 ```python
-"INSERT INTO payments (user, amount) VALUES ('%s', %s)" % (p['user'], p['amount'])
+"INSERT INTO payments (user, amount) VALUES ('%s', %s)" % (p["user"], p["amount"])
 ```
 
 This is string interpolation into SQL, not parameter binding. A `user` value of `x'), (1, 999999) --` writes arbitrary rows. On a payments table this is the worst place in the codebase for this bug. Use driver parameters:
@@ -198,11 +198,12 @@ def process_payments(payments, db, retries=3):
                 if attempt == retries - 1:
                     logger.exception(
                         "payment %s failed after %d attempts",
-                        payment["idempotency_key"], retries,
+                        payment["idempotency_key"],
+                        retries,
                     )
                     failed.append((payment, exc))
                     break
-                time.sleep((2 ** attempt) * (0.5 + random.random()))
+                time.sleep((2**attempt) * (0.5 + random.random()))
 
     return succeeded, failed
 ```

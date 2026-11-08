@@ -20,9 +20,9 @@ import sys
 def analyze(pos):
     price, shares = pos["price"], pos["shares"]
     total_p = sum(s["prob"] for s in pos["scenarios"])
-    assert (
-        abs(total_p - 1.0) < 1e-3
-    ), f'{pos["ticker"]}: probabilities sum to {total_p}, not 1.0'
+    assert abs(total_p - 1.0) < 1e-3, (
+        f"{pos['ticker']}: probabilities sum to {total_p}, not 1.0"
+    )
 
     value = price * shares
     scenarios = []

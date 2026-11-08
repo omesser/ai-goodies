@@ -17,7 +17,6 @@ import json
 import re
 import subprocess
 import sys
-from typing import Dict, List, Optional, Tuple
 
 JIRA_KEY_PATTERN = re.compile(r"\b[A-Z][A-Z0-9]+-\d+\b")
 GITHUB_MERGE_PR_SUBJECT_PATTERN = re.compile(
@@ -26,7 +25,7 @@ GITHUB_MERGE_PR_SUBJECT_PATTERN = re.compile(
 GITHUB_SQUASH_PR_SUBJECT_PATTERN = re.compile(r"^.+ \(#(?P<pr_number>\d+)\)$")
 
 
-def run_git(args: List[str]) -> str:
+def run_git(args: list[str]) -> str:
     result = subprocess.run(
         ["git"] + args,
         check=True,
@@ -37,14 +36,14 @@ def run_git(args: List[str]) -> str:
     return result.stdout
 
 
-def parse_commits_in_range(range_ref: str) -> List[str]:
+def parse_commits_in_range(range_ref: str) -> list[str]:
     raw = run_git(["rev-list", "--no-merges", range_ref]).strip()
     if not raw:
         return []
     return raw.splitlines()
 
 
-def parse_commit(sha: str) -> Dict[str, object]:
+def parse_commit(sha: str) -> dict[str, object]:
     field_sep = "\x1f"
     pretty = f"%H{field_sep}%s{field_sep}%b"
     out = run_git(["show", "--no-patch", "--pretty=format:" + pretty, sha])
@@ -69,9 +68,9 @@ def parse_commit(sha: str) -> Dict[str, object]:
     }
 
 
-def ordered_unique(items: List[str]) -> List[str]:
+def ordered_unique(items: list[str]) -> list[str]:
     seen = set()
-    result: List[str] = []
+    result: list[str] = []
     for item in items:
         if item in seen:
             continue
@@ -80,7 +79,7 @@ def ordered_unique(items: List[str]) -> List[str]:
     return result
 
 
-def parse_pr_from_subject(subject: str) -> Tuple[Optional[int], Optional[str]]:
+def parse_pr_from_subject(subject: str) -> tuple[int | None, str | None]:
     patterns = (
         GITHUB_MERGE_PR_SUBJECT_PATTERN,
         GITHUB_SQUASH_PR_SUBJECT_PATTERN,
