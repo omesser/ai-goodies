@@ -93,7 +93,8 @@ def _self_check():
 if __name__ == "__main__":
     _self_check()
     if len(sys.argv) > 1:
-        raw = open(sys.argv[1]).read()
+        with open(sys.argv[1], encoding="utf-8") as f:
+            raw = f.read()
     elif not sys.stdin.isatty():
         raw = sys.stdin.read()
     else:

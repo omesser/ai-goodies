@@ -140,7 +140,7 @@ def main() -> int:
 
     try:
         commits = read_commits(args.input)
-    except Exception as err:  # noqa: BLE001
+    except Exception as err:
         sys.stderr.write(f"Failed to read commit input: {err}\n")
         return 1
 
@@ -177,7 +177,7 @@ def main() -> int:
 
     try:
         cloud_id = get_cloud_id(base_url)
-    except Exception as err:  # noqa: BLE001
+    except Exception as err:
         sys.stderr.write(f"Failed to resolve cloud id from ATLASSIAN_BASE_URL: {err}\n")
         return 1
 
@@ -213,8 +213,8 @@ def main() -> int:
             }
         except URLError as err:
             issues_by_key[key] = {"key": key, "error": "network", "details": str(err)}
-        
-        except Exception as err:  # noqa: BLE001
+
+        except Exception as err:
             issues_by_key[key] = {
                 "key": key,
                 "error": "unexpected",

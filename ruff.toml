@@ -1,0 +1,3 @@
+[lint]
+# These scripts catch Exception on purpose and report it. Ignore only this rule.
+ignore = ["BLE001"]

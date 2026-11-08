@@ -53,8 +53,7 @@ def run_git(args: list[str]) -> str:
     result = subprocess.run(
         ["git"] + args,
         check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=True,
     )
     return result.stdout.strip()
@@ -64,7 +63,7 @@ def read_commits(path: str) -> list[dict[str, Any]]:
     with open(path, "r", encoding="utf-8") as file:
         commits = json.load(file)
     if not isinstance(commits, list):
-        raise RuntimeError("Input JSON must be an array of commits")
+        raise TypeError("Input JSON must be an array of commits")
     return commits
 
 
