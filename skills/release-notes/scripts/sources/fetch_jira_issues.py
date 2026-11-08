@@ -98,7 +98,7 @@ def read_commits(path: str) -> list[dict[str, Any]]:
     with open(path, "r", encoding="utf-8") as f:
         commits = json.load(f)
     if not isinstance(commits, list):
-        raise RuntimeError("Input JSON must be an array of commits")
+        raise TypeError("Input JSON must be an array of commits")
     return commits
 
 
@@ -140,7 +140,7 @@ def main() -> int:
 
     try:
         commits = read_commits(args.input)
-    except Exception as err:
+    except Exception as err:  # noqa: BLE001
         sys.stderr.write(f"Failed to read commit input: {err}\n")
         return 1
 
@@ -177,7 +177,7 @@ def main() -> int:
 
     try:
         cloud_id = get_cloud_id(base_url)
-    except Exception as err:
+    except Exception as err:  # noqa: BLE001
         sys.stderr.write(f"Failed to resolve cloud id from ATLASSIAN_BASE_URL: {err}\n")
         return 1
 
@@ -213,7 +213,8 @@ def main() -> int:
             }
         except URLError as err:
             issues_by_key[key] = {"key": key, "error": "network", "details": str(err)}
-        except Exception as err:
+        
+        except Exception as err:  # noqa: BLE001
             issues_by_key[key] = {
                 "key": key,
                 "error": "unexpected",
