@@ -50,6 +50,7 @@ Then invoke it in a new session — e.g. `/explain-to-manager` in Claude Code. S
 | [`bro/`](skills/bro/) | ✅ Yes — user-invoked only | Restate the last message in plain language, with no jargon |
 | [`unslop/`](skills/unslop/) | ✅ Yes — user-invoked only | Cut AI tells from any writing. Imported verbatim from [cursor/plugins `pstack`](https://github.com/cursor/plugins/blob/bc697d0a5a163cec979e362b601e36f5616083fd/pstack/skills/unslop/SKILL.md) (MIT, license kept alongside) |
 | [`analyze-stock-graph/`](skills/analyze-stock-graph/) | ✅ Yes — user-invoked only | Chart read: Edwards & Magee for structure and patterns, William O'Neil's buy rules. Returns a verdict, pivot or entry, stop in ATRs, target and R:R, and the invalidation level |
+| [`caveman-micro/`](skills/caveman-micro/) | ✅ Yes — user-invoked only | Six-line register: drop filler, keep technical substance. Imported from [kuba-guzik/caveman-micro](https://github.com/kuba-guzik/caveman-micro/blob/e8c4904996539153ffb7789dc5e033c048b9f32e/caveman-micro.txt) (MIT, license kept alongside) |
 
 > Note: some skills are imported from the grok/ClawHub marketplace and retain their `_meta.json` / `skill-card.md` provenance files.
 
