@@ -5,6 +5,8 @@ updates:
     package-ecosystem: "github-actions"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     labels:
       - "maintenance"
 
@@ -12,5 +14,7 @@ updates:
     package-ecosystem: "pre-commit"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     labels:
       - "maintenance"
