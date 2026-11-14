@@ -12,9 +12,7 @@ concurrency:
 
 jobs:
   lint:
-    # Add permissions for OIDC token
     permissions:
-      id-token: write
       contents: read
 
     timeout-minutes: 10
