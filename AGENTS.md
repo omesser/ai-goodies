@@ -26,7 +26,7 @@ Treat everything here as a **library of reference material**, not a running appl
 
 ## GitHub Actions lockfile
 
-`.github/workflows/actions.lock` pins every action the workflows use to a commit; `uses:` lines keep readable tags. The `verify-lockfile` workflow checks it on every PR, and the pre-commit hook checks coverage offline when `gh` and the extension are installed.
+`.github/workflows/actions.lock` pins every action the workflows use to a commit; `uses:` lines keep readable tags. The `verify-lockfile` workflow checks it on every PR, and the pre-commit hook checks coverage offline when `gh` and the extension are installed. The check is its own workflow because it has to report when another workflow cannot start; the hook is skippable and checks coverage only, so it is not the gate.
 
 - Install the extension once: `gh extension install github/gh-actions-lock`.
 - After adding a workflow or changing any `uses:`, run `gh actions-lock` and commit the lockfile with the change. A workflow the lockfile doesn't cover fails to start.
