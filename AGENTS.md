@@ -24,6 +24,16 @@ Treat everything here as a **library of reference material**, not a running appl
 
 7. **Stay minimal and proportional.** Make the smallest change that satisfies the request. Ask before broad or destructive edits.
 
+## GitHub Actions lockfile
+
+`.github/workflows/actions.lock` pins every action the workflows use to a commit; `uses:` lines keep readable tags. The `verify-lockfile` workflow checks it on every PR, and the pre-commit hook checks coverage offline when `gh` and the extension are installed.
+
+- Install the extension once: `gh extension install github/gh-actions-lock`.
+- After adding a workflow or changing any `uses:`, run `gh actions-lock` and commit the lockfile with the change. A workflow the lockfile doesn't cover fails to start.
+- Review a lockfile diff like a dependency bump: check each changed `ref` and `commit` against the action's release.
+- On a `ref-moved` warning, a tag or branch now points at a different commit. Find out why before you accept it; `gh actions-lock --relock` advances floating refs such as `v4`.
+- Never run `--accept-moved` in automation, and never edit the lockfile by hand.
+
 ## Conventions
 
 - Writing skills: [`guides/skill-authoring.md`](guides/skill-authoring.md)
