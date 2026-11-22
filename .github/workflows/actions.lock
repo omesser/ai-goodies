@@ -13,7 +13,7 @@ workflows:
         - 'github/codeql-action@v4.39.3'
     '.github/workflows/secret-scanning.yaml':
         - 'actions/checkout@v7.0.1'
-        - 'trufflesecurity/trufflehog@v3.99.8'
+        - 'trufflesecurity/trufflehog@v3.99.9'
     '.github/workflows/tests.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-python@v7.1.0'
@@ -40,8 +40,8 @@ dependencies:
         commit: 'sha1-33d7b85da1a04171e211befe2c739303b9a4c066'
         owner_id: 9919
         repo_id: 259445878
-    'trufflesecurity/trufflehog@v3.99.8':
-        ref: 'v3.99.8'
-        commit: 'sha1-ea68ca03c865c5f324e86e849ced20ed3cf9dbbb'
+    'trufflesecurity/trufflehog@v3.99.9':
+        ref: 'v3.99.9'
+        commit: 'sha1-3bd2b5887eb0efb8fa18bfd1d296032924e4ffdc'
         owner_id: 79229934
         repo_id: 77726177
