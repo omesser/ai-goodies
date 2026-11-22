@@ -1,0 +1,38 @@
+name: Verify lockfile
+
+# Fails when .github/workflows/actions.lock is out of sync with the workflows,
+# or a locked pin no longer verifies upstream. A workflow whose uses: lines the
+# lockfile doesn't cover fails to start, with no check saying why; this does.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  verify-lockfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_ACTIONS_LOCK: v0.5.1
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install gh-actions-lock
+        run: gh extension install github/gh-actions-lock --pin "$GH_ACTIONS_LOCK"
+
+      - name: Verify the lockfile
+        run: gh actions-lock --verify

@@ -9,6 +9,13 @@ updates:
       default-days: 7
     labels:
       - "maintenance"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   - directory: "/"
     package-ecosystem: "pre-commit"

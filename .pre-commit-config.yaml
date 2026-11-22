@@ -59,3 +59,14 @@ repos:
       - id: shfmt
         args: ['-l', '-i', '2', '-ci', '-sr', '-w']
       - id: shellcheck
+
+    # Actions lockfile coverage (offline). CI's verify-lockfile job runs the full --verify.
+  - repo: local
+    hooks:
+      - id: actions-lock-verify-local
+        name: gh actions-lock --verify-local
+        entry: scripts/hooks/actions-lock-verify-local.sh
+        language: system
+        files: ^\.github/workflows/
+        pass_filenames: false
+        verbose: true
